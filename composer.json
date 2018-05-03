@@ -1,0 +1,48 @@
+{
+  "name": "mrjmpl3/laravel-restful-helper",
+  "version": "1.6.0",
+  "type": "library",
+  "description": "Laravel Helper to Restful projects",
+  "keywords": [
+    "MrJmpl3",
+    "Laravel_Restful_Helper",
+    "laravel",
+    "restful",
+    "helper"
+  ],
+  "homepage": "https://github.com/MrJmpl3/Laravel_Restful_Helper",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "MrJmpl3",
+      "email": "jmpl3.soporte@gmail.com",
+      "homepage": "https://www.mrjmpl3-official.es",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "illuminate/support": "~5.6.0",
+    "php": "^7.1.3"
+  },
+  "require-dev": {
+  },
+  "autoload": {
+    "psr-4": {
+      "MrJmpl3\\Laravel_Restful_Helper\\": "src"
+    }
+  },
+  "autoload-dev": {
+  },
+  "scripts": {
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "MrJmpl3\\Laravel_Restful_Helper\\Laravel_Restful_Helper_ServiceProvider"
+      ]
+    }
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
