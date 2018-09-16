@@ -38,8 +38,6 @@ class Laravel_Restful_Helper_ServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(
-            __DIR__.'/Config/restful-helper.php', 'restful_helper'
-        );
+        $this->mergeConfigFrom(__DIR__.'/Config/restful-helper.php', 'restful_helper');
     }
 }

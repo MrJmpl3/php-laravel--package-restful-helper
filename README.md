@@ -17,14 +17,24 @@ $ composer require mrjmpl3/laravel-restful-helper
 		``` php
 		use MrJmpl3\Laravel_Restful_Helper\Traits\ApiTrait;
 		```
-	- And use like next example:
+	- And use like next example to Resource Collection:
 	
 		``` php
 		public function index() {
 			$products = new Product();
 			$products = $this->executeApiResponse($products);
 				
-			return new ProductCollection($products);
+			return new ProductResourceCollection($products);
+		}
+		```
+	- And use like next example to Resource:
+	
+		``` php
+		public function index() {
+			$product = new Product();
+			$product = $this->apiFieldsOnlyModel($product);
+				
+			return new ProductoResource($product);
 		}
 		```
 

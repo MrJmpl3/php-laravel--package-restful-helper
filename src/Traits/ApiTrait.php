@@ -22,164 +22,167 @@ use Illuminate\Support\Facades\Validator;
 trait ApiTrait
 {
     /**
-     * Sirve para seleccionar datos / Select some fields to response
+     * @param \Illuminate\Database\Eloquent\Model $model
      *
-     * Ejemplo / Example: /product?fields=value1,value2,value3,value4
-     * En el mundo real / In RealWorld: /product?fields=id,name
-     *
-     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $model
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
+     * @throws \Illuminate\Validation\ValidationException
      */
-    protected function apiFields($model)
+    protected function executeApiResponse($model)
     {
-        /**
-         * Si existe la consulta de fields
-         */
-        if (request()->has('fields')) {
-            /**
-             * Obtengo las columnas de la tabla del modelo
-             */
-            $columns = Schema::getColumnListing($model->getModel()->getTable());
+        $query = $model;
 
-            /**
-             * Obtengo la linea de consulta de fields
-             */
+        if (config('restful_helper.fields')) {
+            $query = $this->apiFields($query, $model);
+        }
+
+        if (config('restful_helper.filters')) {
+            $query = $this->apiFilter($query, $model);
+        }
+
+        if (config('restful_helper.sorts')) {
+            $query = $this->apiSort($query, $model);
+        }
+
+        if (config('restful_helper.paginate')) {
+            $query = $this->apiPaginate($query);
+        }
+
+        return $query;
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Model $model
+     *
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
+     */
+    protected function apiFieldsOnlyModel($model)
+    {
+        if (request()->has('fields')) {
+            $columns = Schema::getColumnListing($model->getTable());
             $queryFields = explode(',', request()->get('fields'));
 
-            /**
-             * Arreglo de Select
-             */
             $selectColumns = [];
 
-            /**
-             * Recorro las columnas
-             */
             foreach ($columns as $column) {
-                /**
-                 * Verifico si la columna esta asignada en el transform
-                 */
-                if (isset($model->getModel()->transforms[$column])) {
-                    /**
-                     * Verifico si la columna modificada esta en la consulta
-                     */
-                    if (in_array($model->getModel()->transforms[$column], $queryFields)) {
+                if (isset($model->transforms[$column])) {
+                    if (in_array($model->transforms[$column], $queryFields)) {
                         $selectColumns[] = $column;
                     }
                 } else {
-                    /**
-                     * Verifico si la columna esta en la consulta
-                     */
                     if (in_array($column, $queryFields)) {
                         $selectColumns[] = $column;
                     }
                 }
             }
 
-            /**
-             * Selecciono segun la consulta solo si el arreglo de Select no esta vacio
-             */
             if (count($selectColumns) > 0) {
                 $model = $model->select($selectColumns);
             }
         }
 
-        /**
-         * Retorno el modelo
-         */
         return $model;
     }
 
     /**
-     * Sirve para filtrar datos / Filter some fields with data to response
+     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $query
+     * @param \Illuminate\Database\Eloquent\Model                                       $model
      *
-     * Ejemplo / Example: /product?value1=data1&value2=data2
-     * En el mundo real / In RealWorld: /product?id=1&name=test
-     *
-     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $model
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
      */
-    protected function apiFilter($model)
+    private function apiFields($query, $model)
     {
-        /**
-         * Obtengo las columnas de la tabla del modelo
-         */
-        $columns = Schema::getColumnListing($model->getTable());
+        if (request()->has('fields')) {
+            $columns = Schema::getColumnListing($model->getTable());
+            $queryFields = explode(',', request()->get('fields'));
 
-        /**
-         * Obtengo el tipo de variable de cada columna
-         */
+            $selectColumns = [];
+
+            foreach ($columns as $column) {
+                if (isset($model->transforms[$column])) {
+                    if (in_array($model->transforms[$column], $queryFields)) {
+                        $selectColumns[] = $column;
+                    }
+                } else {
+                    if (in_array($column, $queryFields)) {
+                        $selectColumns[] = $column;
+                    }
+                }
+            }
+
+            if (count($selectColumns) > 0) {
+                $query = $query->select($selectColumns);
+            }
+        }
+
+        return $query;
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $query
+     * @param \Illuminate\Database\Eloquent\Model                                       $model
+     *
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
+     */
+    private function apiFilter($query, $model)
+    {
+        $columns = Schema::getColumnListing($model->getTable());
         $casts = $model->getCasts();
 
-        /**
-         * Recorro las columnas
-         */
         foreach ($columns as $column) {
-            /**
-             * Verifico si la columna esta asignada en el transform
-             */
-            if (isset($model->getModel()->transforms[$column])) {
-                /**
-                 * Verifico si la columna modificado existe en la peticion
-                 */
-                if (request()->has($model->getModel()->transforms[$column])) {
-                    /**
-                     * Ejecuto el where segun el casteo y dato enviado
-                     */
-                    if (request()->input($model->getModel()->transforms[$column]) === '') {
-                        $model = $model->where($column, '=', null);
+            if (isset($model->transforms[$column])) {
+                if (request()->has($model->transforms[$column])) {
+                    if (request()->input($model->transforms[$column]) === '') {
+                        $query = $query->where($column, '=', null);
                     } else {
                         switch ($casts[$column]) {
                             case 'int':
                             case 'integer':
-                                $model = $model->where($column, '=', intval(request()->input($model->getModel()->transforms[$column])));
+                                $query = $query->where($column, '=', intval(request()->input($model->transforms[$column])));
                                 break;
                             case 'real':
                             case 'float':
                             case 'double':
-                                $model = $model->where($column, '=', floatval(request()->input($model->getModel()->transforms[$column])));
+                                $query = $query->where($column, '=', floatval(request()->input($model->transforms[$column])));
                                 break;
                             case 'string':
-                                $model = $model->where($column, '=', strval(request()->input($model->getModel()->transforms[$column])));
+                                $query = $query->where($column, '=', strval(request()->input($model->transforms[$column])));
                                 break;
                             case 'bool':
                             case 'boolean':
-                                $model = $model->where($column, '=', boolval(request()->input($model->getModel()->transforms[$column])));
+                                $query = $query->where($column, '=', boolval(request()->input($model->transforms[$column])));
                                 break;
                             case 'date':
                             case 'datetime':
-                                $model = $model->where($column, '=', Carbon::createFromFormat('d/m/Y', request()->input($model->getModel()->transforms[$column]), 'America/Lima')->format('Y-m-d'));
+                                $query = $query->where($column, '=', Carbon::createFromFormat('d/m/Y', request()->input($model->transforms[$column]), 'America/Lima')->format('Y-m-d'));
                                 break;
                         }
                     }
                 }
             } else {
-                /**
-                 * Ejecuto el where segun el casteo y dato enviado
-                 */
                 if (request()->has($column)) {
                     if (request()->input($column) === '') {
-                        $model = $model->where($column, '=', null);
+                        $query = $query->where($column, '=', null);
                     } else {
                         switch ($casts[$column]) {
                             case 'int':
                             case 'integer':
-                                $model = $model->where($column, '=', intval(request()->input($column)));
+                                $query = $query->where($column, '=', intval(request()->input($column)));
                                 break;
                             case 'real':
                             case 'float':
                             case 'double':
-                                $model = $model->where($column, '=', floatval(request()->input($column)));
+                                $query = $query->where($column, '=', floatval(request()->input($column)));
                                 break;
                             case 'string':
-                                $model = $model->where($column, '=', strval(request()->input($column)));
+                                $query = $query->where($column, '=', strval(request()->input($column)));
                                 break;
                             case 'bool':
                             case 'boolean':
-                                $model = $model->where($column, '=', boolval(request()->input($column)));
+                                $query = $query->where($column, '=', boolval(request()->input($column)));
                                 break;
                             case 'date':
                             case 'datetime':
-                                $model = $model->where($column, '=', Carbon::createFromFormat('d/m/Y', request()->input($column), 'America/Lima')->format('Y-m-d'));
+                                $query = $query->where($column, '=', Carbon::createFromFormat('d/m/Y', request()->input($column), 'America/Lima')->format('Y-m-d'));
                                 break;
                         }
                     }
@@ -187,177 +190,85 @@ trait ApiTrait
             }
         }
 
-        return $model;
+        return $query;
     }
 
     /**
-     * Sirve para ordenar datos / Sort some fields to response
+     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $query
+     * @param \Illuminate\Database\Eloquent\Model                                       $model
      *
-     * Ejemplo / Example : /product?sort=-column1,column2
-     * En el mundo real / In RealWorld: /product?sort=-id,name
-     *
-     * Con prefijo negativo / With negative prefix = desc
-     * Sin prefijo negativo / Without negative prefix = asc
-     *
-     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $model
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
      */
-    protected function apiSort($model)
+    private function apiSort($query, $model)
     {
-        /**
-         * Si existe la consulta de sortBy
-         */
         if (request()->has('sort')) {
-            /**
-             * Obtengo la linea de consulta de sortBy
-             */
             $querySortBy = explode(',', request()->get('sort'));
-
-            /**
-             * Obtengo las columnas de la tabla del modelo
-             */
             $columns = Schema::getColumnListing($model->getTable());
 
-            /**
-             * Recorro las columnas
-             */
             foreach ($columns as $column) {
-                /**
-                 * Verifico si la columna esta asignada en el transform
-                 */
-                if (isset($model->getModel()->transforms[$column])) {
-                    /**
-                     * En caso de que existe una query de la columna modificada
-                     * Caso aparte: En caso de que existe una query de la columna pero con un '-'
-                     */
-                    if (in_array($model->getModel()->transforms[$column], array_values($querySortBy))) {
-                        $model = $model->orderBy($column, 'asc');
-                    } elseif (in_array('-'.$model->getModel()->transforms[$column], array_values($querySortBy))) {
-                        $model = $model->orderBy($column, 'desc');
+                if (isset($model->transforms[$column])) {
+                    if (in_array($model->transforms[$column], array_values($querySortBy))) {
+                        $query = $query->orderBy($column, 'asc');
+                    } elseif (in_array('-'.$model->transforms[$column], array_values($querySortBy))) {
+                        $query = $query->orderBy($column, 'desc');
                     }
                 } else {
-                    /**
-                     * En caso de que existe una query de la columna
-                     * Caso aparte: En caso de que existe una query de la columna pero con un '-'
-                     */
                     if (in_array($column, array_values($querySortBy))) {
-                        $model = $model->orderBy($column, 'asc');
+                        $query = $query->orderBy($column, 'asc');
                     } elseif (in_array('-'.$column, array_values($querySortBy))) {
-                        $model = $model->orderBy($column, 'desc');
+                        $query = $query->orderBy($column, 'desc');
                     }
                 }
             }
 
-            /**
-             * Retorno el modelo
-             */
-            return $model;
+            return $query;
         } else {
-            /**
-             * Retorno el modelo con el orderBy basico
-             */
-            return $model->orderBy('id', 'asc');
+            return $query->orderBy('id', 'asc');
         }
     }
 
     /**
-     * Sirve para paginar las respuestas / Paginate to response
+     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $query
      *
-     * Ejemplo / Example: /product?paginate=true
-     * En el mundo real / In RealWorld: /product?paginate=true
-     *
-     * Puedes seleccionar la cantidad de datos por paginas / You can select the amount data per page
-     *
-     * Ejemplo 2 / Example 2: /product?paginate=true&per_page=5
-     * En el mundo real 2/ In RealWorld 2: /product?paginate=true&per_page=5
-     *
-     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $model
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Model
      * @throws \Illuminate\Validation\ValidationException
      */
-    protected function apiPaginate($model)
+    private function apiPaginate($query)
     {
-        /**
-         * Valor inicial de Paginas
-         */
         $perPage = 15;
 
-        /**
-         * Si existe la consulta
-         */
         if (request()->has('per_page')) {
-            /**
-             * Valido que este correcto el parametro
-             */
             $rulesPerPage = [
                 'per_page' => 'integer|min:2|max:50',
             ];
 
             Validator::validate(request()->all(), $rulesPerPage);
 
-            /**
-             * Asigno el nuevo valor
-             */
             $perPage = intval(request()->get('per_page'));
         }
 
-        /**
-         * Valor inicial de Paginacion
-         */
         $paginate = true;
 
-        /**
-         * Si existe la consulta
-         */
         if (request()->has('paginate')) {
-            /**
-             * Asigno el nuevo valor
-             */
             $paginate = (request()->input('paginate') === 'true');
         }
 
-        /**
-         * Retorno el modelo final con/sin la paginacion conservando las demas queries en meta - links
-         */
-        return $paginate ? $model->paginate($perPage)->appends(request()->all()) : $model->get();
+        return $paginate
+            ? $query->paginate($perPage)->appends(request()->all())
+            : $query->get();
     }
 
     /**
-     * Execute Api Response
-     *
-     * @param $model
-     * @return mixed
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    protected function executeApiResponse($model)
-    {
-        if (config('restful_helper.filters')) {
-            $model = $this->apiFilter($model);
-        }
-
-        if (config('restful_helper.sorts')) {
-            $model = $this->apiSort($model);
-        }
-
-        if (config('restful_helper.fields')) {
-            $model = $this->apiFields($model);
-        }
-
-        if (config('restful_helper.paginate')) {
-            $model = $this->apiPaginate($model);
-        }
-
-        return $model;
-    }
-
-    /**
-     * @param $model
+     * @param        $model
      * @param string $originalValue
+     *
      * @return bool
      */
     protected function existsInApiFields($model, string $originalValue)
     {
-        $queryFields = (request()->has('fields')) ? explode(',', request()->get('fields')) : [];
+        $queryFields = (request()->has('fields'))
+            ? explode(',', request()->get('fields'))
+            : [];
 
         if (count($queryFields) === 0) {
             return true;

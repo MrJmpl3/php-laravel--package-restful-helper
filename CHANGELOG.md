@@ -44,3 +44,19 @@
 
 - Rename: restful_helper.php in config to restful-helper.php
 - Rename: Package name from laravel_restful_helper to laravel-restful-helper
+
+## v1.6.1
+
+### Changed
+
+- Add support to Laravel 5.7
+
+## v.1.7
+
+## Changed
+
+- To single model use apiFieldsOnlyModel
+
+## Fixed
+
+- Bug when Filter + Sort
