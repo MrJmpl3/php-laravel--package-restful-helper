@@ -47,5 +47,5 @@ return [
      * Ejemplo 2 / Example 2: /product?paginate=true&per_page=5
      * En el mundo real 2/ In RealWorld 2: /product?paginate=true&per_page=5
      */
-    'paginate' => true
+    'paginate' => true,
 ];
