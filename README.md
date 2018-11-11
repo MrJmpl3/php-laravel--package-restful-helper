@@ -52,14 +52,13 @@ $ composer require mrjmpl3/laravel-restful-helper
 	
 		``` php
 		public function index() {
-			// Important! Don't close the query with get() or paginate()
-			
-			// The second param is 'custom block filter' prevent to query override the builder select
-			
-			$products = Product::where('state', = , 1);
-			$products = $this->executeApiResponseFromBuilderToRC($products, ['state']);
-				
-			return new ProductResourceCollection($products);
+		    // Important! Don't close the query with get() or paginate()
+		    // The second param is 'custom block filter' prevent to query override the builder select
+		    
+		    $products = Product::where('state', = , 1);
+		    $products = $this->executeApiResponseFromBuilderToRC($products, ['state']);
+		    
+		    return new ProductResourceCollection($products);
 		}
 		```
 		
@@ -67,10 +66,10 @@ $ composer require mrjmpl3/laravel-restful-helper
 	
 		``` php
 		public function index() {
-			$product = Product::where('state', = , 1);
-			$product = $this->executeApiResponseFromBuilderToResource($product);
-				
-			return new ProductoResource($product);
+		    $product = Product::where('state', = , 1);
+		    $product = $this->executeApiResponseFromBuilderToResource($product);
+		    
+		    return new ProductoResource($product);
 		}
         ```
         
@@ -78,36 +77,35 @@ $ composer require mrjmpl3/laravel-restful-helper
     
     - In model, add array like next example:
         ``` php
-    		public $apiAcceptRelations = [
-    			'post'
-    		];
-    		
-    		Where 'post' is the function name of relation
+        public $apiAcceptRelations = [
+            'post'
+        ];
     	```
+    	
+    	Where 'post' is the function name of relation
     		
     - In the API Resources, use the function embed
 
         ``` php
-    		$embedRequest = $this->embed($this);
-    		
-    		return [
-    			'id => $this->id,
-    			'name' => $this->name,
-    			$this->mergeWhen(array_key_exists('post', $embedRequest), [
-    			    'post' => $this->getPostResource($embedRequest),
-    			]),
-    			'created_at' => $this->created_at,
-    			'updated_at' => $this->updated_at,
-    		];
-    		
-    		private function getPostResource($embedRequest) {
-    		    $postRelation = null;
-    		    if (array_key_exists('post', $embedRequest)) {
-    		        $postRelation = new PostResource($this->apiFieldsFromArrayToResource($this->post(), $embedRequest['post'])->first());
-    		    }
-    		    
-    		    return $postRelation;
-    		}
+        $embedRequest = $this->embed($this);
+        
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            $this->mergeWhen(array_key_exists('post', $embedRequest), [
+                'post' => $this->getPostResource($embedRequest),
+            ]),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
+        
+        private function getPostResource($embedRequest) {
+            $postRelation = null;
+            if (array_key_exists('post', $embedRequest)) {
+                $postRelation = new PostResource($this->apiFieldsFromArrayToResource($this->post(), $embedRequest['post'])->first());
+            }
+            return $postRelation;
+        }
     	```
     		
 - **To transformers fields works with this package:**
@@ -116,7 +114,7 @@ $ composer require mrjmpl3/laravel-restful-helper
 	
 		``` php
 		public $apiTransforms = [
-			'id' => 'code'
+		    'id' => 'code'
 		];
 		```
 		
