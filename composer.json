@@ -1,6 +1,6 @@
 {
     "name": "mrjmpl3/laravel-restful-helper",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "type": "library",
     "description": "Laravel Helper to Restful projects",
     "keywords": [

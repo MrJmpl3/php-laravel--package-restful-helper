@@ -78,3 +78,8 @@
 - Rename Function: apiFieldsOnlyModel -> executeApiResponseToResource
 - Remove Function: existsInApiFields
 
+## v2.0.1
+
+### Fix
+
+- Fix the README
