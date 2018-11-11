@@ -17,33 +17,105 @@ $ composer require mrjmpl3/laravel-restful-helper
 		``` php
 		use MrJmpl3\Laravel_Restful_Helper\Traits\ApiTrait;
 		```
+		
 	- And use like next example to Resource Collection:
 	
 		``` php
 		public function index() {
 			$products = new Product();
-			$products = $this->executeApiResponse($products);
+			$products = $this->executeApiResponseToRC($products);
 				
 			return new ProductResourceCollection($products);
 		}
 		```
+		
 	- And use like next example to Resource:
 	
 		``` php
 		public function index() {
 			$product = new Product();
-			$product = $this->apiFieldsOnlyModel($product);
+			$product = $this->executeApiResponseToResource($product);
 				
 			return new ProductoResource($product);
 		}
 		```
+		
+- **To packages to works correctly with Builder Query:**
 
+    - Add next Trait:
+	
+		``` php
+		use MrJmpl3\Laravel_Restful_Helper\Traits\ApiTrait;
+		```
+		
+	- And use like next example to Resource Collection:
+	
+		``` php
+		public function index() {
+			// Important! Don't close the query with get() or paginate()
+			
+			// The second param is 'custom block filter' prevent to query override the builder select
+			
+			$products = Product::where('state', = , 1);
+			$products = $this->executeApiResponseFromBuilderToRC($products, ['state']);
+				
+			return new ProductResourceCollection($products);
+		}
+		```
+		
+	- And use like next example to Resource:
+	
+		``` php
+		public function index() {
+			$product = Product::where('state', = , 1);
+			$product = $this->executeApiResponseFromBuilderToResource($product);
+				
+			return new ProductoResource($product);
+		}
+        ```
+        
+- **To packages to works correctly with Relations:**
+    
+    - In model, add array like next example:
+        ``` php
+    		public $apiAcceptRelations = [
+    			'post'
+    		];
+    		
+    		Where 'post' is the function name of relation
+    	```
+    		
+    - In the API Resources, use the function embed
+
+        ``` php
+    		$embedRequest = $this->embed($this);
+    		
+    		return [
+    			'id => $this->id,
+    			'name' => $this->name,
+    			$this->mergeWhen(array_key_exists('post', $embedRequest), [
+    			    'post' => $this->getPostResource($embedRequest),
+    			]),
+    			'created_at' => $this->created_at,
+    			'updated_at' => $this->updated_at,
+    		];
+    		
+    		private function getPostResource($embedRequest) {
+    		    $postRelation = null;
+    		    if (array_key_exists('post', $embedRequest)) {
+    		        $postRelation = new PostResource($this->apiFieldsFromArrayToResource($this->post(), $embedRequest['post'])->first());
+    		    }
+    		    
+    		    return $postRelation;
+    		}
+    	```
+    		
 - **To transformers fields works with this package:**
 
 	- In model, add array like next example:
 	
 		``` php
-		public $transforms = [
+		public $apiTransforms = [
 			'id' => 'code'
 		];
 		```
@@ -54,7 +126,7 @@ $ composer require mrjmpl3/laravel-restful-helper
 	
 		``` php
 		return [
-			$this->transforms['id'] => $this->id,
+			$this->apiTransforms['id'] => $this->id,
 			'name' => $this->name,
 			'created_at' => $this->created_at,
 			'updated_at' => $this->updated_at,
@@ -69,19 +141,31 @@ $ composer require mrjmpl3/laravel-restful-helper
     	use MrJmpl3\Laravel_Restful_Helper\Traits\ApiTrait;
     	```
     	
-    - Used the mergeWhen and existsInFields function like next example:
+    - Used the mergeWhen function like next example:
     
     	``` php
     	return [
-    		$this->mergeWhen($this->existsInApiFields($this,'id'), [
+    		$this->mergeWhen(is_null($this->id), [
     			$this->transforms['id'] => $this->id
     		]),
-    		$this->mergeWhen($this->existsInApiFields($this,'name'), [
+    		$this->mergeWhen(is_null($this->name), [
     			'name' => $this->name
     		]),
     	 ]
     	```
     		
+- **To exclude fields in filter with this package:**
+
+	- In model, add array like next example:
+	
+		``` php
+		public $apiExcludeFilter = [
+			'id'
+		];
+		```
+		
+		Where 'id' is the db column name to exclude
+	
 - **To request:**
 
 	- **Filter data:** 
@@ -103,6 +187,10 @@ $ composer require mrjmpl3/laravel-restful-helper
     
     	- **Example:** /product?paginate=true&per_page=5
     	
+    - **Embed:**
+        
+        - **Example:** /product?embed=relationfunction
+        - **Example 2:** /user?embed=post.id,post.name
 ## Change log
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.

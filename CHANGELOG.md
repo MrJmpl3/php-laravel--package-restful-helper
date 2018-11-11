@@ -51,12 +51,30 @@
 
 - Add support to Laravel 5.7
 
-## v.1.7
+## v1.7
 
-## Changed
+### Changed
 
 - To single model use apiFieldsOnlyModel
 
-## Fixed
+### Fixed
 
 - Bug when Filter + Sort
+
+## v2.0
+
+### Added
+
+- New Function: executeApiResponseFromBuilderToRC
+- New Function: executeApiResponseFromBuilderToResource
+- New Function: embed
+- New Function: apiFieldsFromArrayToResource
+- New Field: apiExcludeFilter
+
+### Changed
+
+- Rename field = transforms -> apiTransforms
+- Rename Function: executeApiResponse -> executeApiResponseToRC
+- Rename Function: apiFieldsOnlyModel -> executeApiResponseToResource
+- Remove Function: existsInApiFields
+
