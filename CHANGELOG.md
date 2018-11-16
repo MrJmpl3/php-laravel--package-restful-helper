@@ -83,3 +83,13 @@
 ### Fix
 
 - Fix the README
+
+## v2.1.0
+
+## Fix
+
+- Fix the README
+
+## Deleted
+
+- Delete Function: executeApiResponseToResource because with/without Dependencies Inyection , you used a Builder always.

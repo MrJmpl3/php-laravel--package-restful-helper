@@ -82,39 +82,6 @@ trait ApiTrait
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model $model
-     *
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
-     */
-    protected function executeApiResponseToResource($model)
-    {
-        if (request()->has('fields')) {
-            $columns = Schema::getColumnListing($model->getTable());
-            $queryFields = explode(',', request()->get('fields'));
-
-            $selectColumns = [];
-
-            foreach ($columns as $column) {
-                if (isset($model->apiTransforms[$column])) {
-                    if (in_array($model->apiTransforms[$column], $queryFields)) {
-                        $selectColumns[] = $column;
-                    }
-                } else {
-                    if (in_array($column, $queryFields)) {
-                        $selectColumns[] = $column;
-                    }
-                }
-            }
-
-            if (count($selectColumns) > 0) {
-                $model = $model->select($selectColumns);
-            }
-        }
-
-        return $model;
-    }
-
-    /**
      * @param \Illuminate\Database\Eloquent\Builder $builder
      *
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
@@ -122,7 +89,8 @@ trait ApiTrait
     protected function executeApiResponseFromBuilderToResource($builder)
     {
         if (request()->has('fields')) {
-            $columns = Schema::getColumnListing($builder->getModel()->getTable());
+            $columns = Schema::getColumnListing($builder->getModel()
+                                                        ->getTable());
             $queryFields = explode(',', request()->get('fields'));
 
             $selectColumns = [];
@@ -144,7 +112,7 @@ trait ApiTrait
             }
         }
 
-        return $builder;
+        return $builder->first();
     }
 
     /**
@@ -276,7 +244,7 @@ trait ApiTrait
         $casts = $model->getCasts();
 
         foreach ($columns as $column) {
-            if(!isset($model->apiExcludeFilter[$column]) && !isset($blockFilter[$column])) {
+            if (!isset($model->apiExcludeFilter[$column]) && !isset($blockFilter[$column])) {
                 if (isset($model->apiTransforms[$column])) {
                     if (request()->has($model->apiTransforms[$column])) {
                         if (request()->input($model->apiTransforms[$column]) === '') {
@@ -301,7 +269,8 @@ trait ApiTrait
                                     break;
                                 case 'date':
                                 case 'datetime':
-                                    $query = $query->where($column, '=', Carbon::createFromFormat('d/m/Y', request()->input($model->apiTransforms[$column]), 'America/Lima')->format('Y-m-d'));
+                                    $query = $query->where($column, '=', Carbon::createFromFormat('d/m/Y', request()->input($model->apiTransforms[$column]), 'America/Lima')
+                                                                               ->format('Y-m-d'));
                                     break;
                             }
                         }
@@ -330,7 +299,8 @@ trait ApiTrait
                                     break;
                                 case 'date':
                                 case 'datetime':
-                                    $query = $query->where($column, '=', Carbon::createFromFormat('d/m/Y', request()->input($column), 'America/Lima')->format('Y-m-d'));
+                                    $query = $query->where($column, '=', Carbon::createFromFormat('d/m/Y', request()->input($column), 'America/Lima')
+                                                                               ->format('Y-m-d'));
                                     break;
                             }
                         }
@@ -358,13 +328,13 @@ trait ApiTrait
                 if (isset($model->apiTransforms[$column])) {
                     if (in_array($model->apiTransforms[$column], array_values($querySortBy))) {
                         $query = $query->orderBy($column, 'asc');
-                    } elseif (in_array('-'.$model->apiTransforms[$column], array_values($querySortBy))) {
+                    } elseif (in_array('-' . $model->apiTransforms[$column], array_values($querySortBy))) {
                         $query = $query->orderBy($column, 'desc');
                     }
                 } else {
                     if (in_array($column, array_values($querySortBy))) {
                         $query = $query->orderBy($column, 'asc');
-                    } elseif (in_array('-'.$column, array_values($querySortBy))) {
+                    } elseif (in_array('-' . $column, array_values($querySortBy))) {
                         $query = $query->orderBy($column, 'desc');
                     }
                 }
@@ -402,7 +372,8 @@ trait ApiTrait
         }
 
         return $paginate
-            ? $query->paginate($perPage)->appends(request()->all())
+            ? $query->paginate($perPage)
+                    ->appends(request()->all())
             : $query->get();
     }
 }
