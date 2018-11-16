@@ -8,88 +8,115 @@
 
 ### Fixed
 
-- Some bugs
+- Functions:
+    - Some bugs
 
 ## v1.2
 
 ### Added
 
-- ExistsInFields function , to use fields in API Resources
+- Functions:
+    - existsInFields: To use fields in API Resources
 
 ## v1.3
 
-### Fixed
+### Changed
 
-- Rename some functions to prevents override another function from Laravel
+- Functions:
+    - Rename to prevents override another function from Laravel
 	
 ### Added
 
-- Missing model parameter in existsInApiFields
+- Paramethers: 
+    - Missing model parameter in existsInApiFields
 
 ## v1.4
 
 ### Fixed
 
-- ExistsInApiFields when fields query is empty
+- Functions:
+    - existsInApiFields when fields query is empty
 
 ## v1.5
 
 ### Fixed
 
-- Problem in sort function
+- Functions: 
+    - Problem in sort function
 
 ## v1.6
 
 ### Changed
 
-- Rename: restful_helper.php in config to restful-helper.php
-- Rename: Package name from laravel_restful_helper to laravel-restful-helper
+- Functions:
+    - Rename restful_helper.php in config to restful-helper.php
+    - Rename package name from laravel_restful_helper to laravel-restful-helper
 
 ## v1.6.1
 
 ### Changed
 
-- Add support to Laravel 5.7
+- Core:
+    - Add support to Laravel 5.7
 
 ## v1.7
 
 ### Changed
 
-- To single model use apiFieldsOnlyModel
+- Functions:
+    - apiFieldsOnlyModel to single model
 
 ### Fixed
 
-- Bug when Filter + Sort
+- Functions:
+    - Bug when Filter + Sort
 
 ## v2.0
 
 ### Added
 
-- New Function: executeApiResponseFromBuilderToRC
-- New Function: executeApiResponseFromBuilderToResource
-- New Function: embed
-- New Function: apiFieldsFromArrayToResource
-- New Field: apiExcludeFilter
+- Functions:
+    - executeApiResponseFromBuilderToRC
+    - executeApiResponseFromBuilderToResource
+    - embed
+    - apiFieldsFromArrayToResource
+
+- Fields:
+    - New Field: apiExcludeFilter
 
 ### Changed
 
-- Rename field = transforms -> apiTransforms
-- Rename Function: executeApiResponse -> executeApiResponseToRC
-- Rename Function: apiFieldsOnlyModel -> executeApiResponseToResource
-- Remove Function: existsInApiFields
+- Fields:
+    - Rename transforms -> apiTransforms
+    
+- Functions:
+    - Rename executeApiResponse -> executeApiResponseToRC
+    - Rename apiFieldsOnlyModel -> executeApiResponseToResource
+    - Remove existsInApiFields
 
 ## v2.0.1
 
 ### Fix
 
-- Fix the README
+- Core:
+    - Fix the README
 
 ## v2.1.0
 
-## Fix
+### Fix
 
-- Fix the README
+- Core:
+    - Fix the README
 
-## Deleted
+### Deleted
 
-- Delete Function: executeApiResponseToResource because with/without Dependencies Inyection , you used a Builder always.
+- Functions:
+    - Function: executeApiResponseToResource because with/without Dependencies Inyection , you used a Builder always.
+
+## v2.1.1
+
+### Fix
+
+- Core:
+    - Fix the PHPDocs
+    - Fix the CHANGELOG

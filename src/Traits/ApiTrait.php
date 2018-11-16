@@ -52,7 +52,6 @@ trait ApiTrait
 
     /**
      * @param \Illuminate\Database\Eloquent\Builder $builder
-     *
      * @param                                       $blockFilter
      *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
@@ -84,7 +83,7 @@ trait ApiTrait
     /**
      * @param \Illuminate\Database\Eloquent\Builder $builder
      *
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
+     * @return \Illuminate\Database\Eloquent\Model|null
      */
     protected function executeApiResponseFromBuilderToResource($builder)
     {
