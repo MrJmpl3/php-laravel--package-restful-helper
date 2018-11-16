@@ -29,17 +29,6 @@ $ composer require mrjmpl3/laravel-restful-helper
 		}
 		```
 		
-	- And use like next example to Resource:
-	
-		``` php
-		public function index() {
-			$product = new Product();
-			$product = $this->executeApiResponseToResource($product);
-				
-			return new ProductoResource($product);
-		}
-		```
-		
 - **To packages to works correctly with Builder Query:**
 
     - Add next Trait:
