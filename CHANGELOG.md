@@ -120,3 +120,10 @@
 - Core:
     - Fix the PHPDocs
     - Fix the CHANGELOG
+
+## v2.1.2
+
+### Added
+
+- Core
+    - Default params $blockFilter in function executeApiResponseToRC and function executeApiResponseFromBuilderToRC
