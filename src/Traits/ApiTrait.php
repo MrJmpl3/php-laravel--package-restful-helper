@@ -23,11 +23,13 @@ use Illuminate\Support\Facades\Validator;
 trait ApiTrait
 {
     /**
-     * @param $model
+     * @param       $model
+     *
+     * @param array $blockFilter
      *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
      */
-    protected function executeApiResponseToRC($model)
+    protected function executeApiResponseToRC($model, $blockFilter = [])
     {
         $query = $model;
 
@@ -36,7 +38,7 @@ trait ApiTrait
         }
 
         if (config('restful_helper.filters')) {
-            $query = $this->apiFilter($query, $model);
+            $query = $this->apiFilter($query, $model, $blockFilter);
         }
 
         if (config('restful_helper.sorts')) {
@@ -56,7 +58,7 @@ trait ApiTrait
      *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
      */
-    protected function executeApiResponseFromBuilderToRC($builder, $blockFilter)
+    protected function executeApiResponseFromBuilderToRC($builder, $blockFilter = [])
     {
         $model = $builder->getModel();
         $query = $builder;
