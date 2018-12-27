@@ -127,3 +127,10 @@
 
 - Core
     - Default params $blockFilter in function executeApiResponseToRC and function executeApiResponseFromBuilderToRC
+    
+## v2.1.3
+
+### Fix
+
+- Core
+    - Fix some bugs in exists and search arrays
