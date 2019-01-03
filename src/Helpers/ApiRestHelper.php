@@ -11,7 +11,6 @@
 namespace MrJmpl3\Laravel_Restful_Helper\Helpers;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Resources\Json\Resource;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -329,7 +328,8 @@ class ApiRestHelper
         ];
     }
 
-    public function getQueryEmbed() {
+    public function getQueryEmbed()
+    {
 
         // Lista de relaciones en la peticion "embed"
 
@@ -364,12 +364,14 @@ class ApiRestHelper
      * Sirve para obtener la lista de relaciones en la peticion
      *
      * @param \Illuminate\Database\Eloquent\Model $model
-     * @param bool                                     $forced
+     * @param bool                                $forced
      *
      * @return array
      */
-    public function getQueryEmbedValidated($model, bool $forced = FALSE)
-    {
+    public function getQueryEmbedValidated(
+        $model,
+        bool $forced = FALSE
+    ) {
         $embed = $this->getQueryEmbed();
 
         $apiAcceptRelations = [];
@@ -380,7 +382,7 @@ class ApiRestHelper
             $apiAcceptRelations = $model->apiAcceptRelations;
         }
 
-        if($forced) {
+        if ($forced) {
             $embed = $apiAcceptRelations;
         }
 
@@ -408,7 +410,10 @@ class ApiRestHelper
      *
      * @return array
      */
-    public function getQueryEmbedFieldsValidate(Model $model, string $key) {
+    public function getQueryEmbedFieldsValidate(
+        Model $model,
+        string $key
+    ) {
         $embed = $this->getQueryEmbed();
 
         $fieldsFromEmbed = array_get($embed, $key, []);
@@ -463,8 +468,10 @@ class ApiRestHelper
      *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
      */
-    public function responseToResourceCollection($model, $blockFilter = [])
-    {
+    public function responseToResourceCollection(
+        $model,
+        $blockFilter = []
+    ) {
         // Se copia el Model para mantener una inmutabilidad
         $query = $model;
 
@@ -501,8 +508,10 @@ class ApiRestHelper
      *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
      */
-    public function responseFromBuilderToResourceCollection($builder, $blockFilter = [])
-    {
+    public function responseFromBuilderToResourceCollection(
+        $builder,
+        $blockFilter = []
+    ) {
         // Se obtiene el modelo del "Builder"
         $model = $builder->getModel();
 
@@ -555,6 +564,89 @@ class ApiRestHelper
     }
 
     /**
+     * @param      $key
+     *
+     * @return bool
+     */
+    public function existInFields($key)
+    {
+        $fields = $this->getQueryFields();
+
+        if (!empty($fields)) {
+            return array_has($fields, $key);
+        }
+
+        return TRUE;
+    }
+
+    /**
+     * @param $key
+     * @param $model
+     *
+     * @return bool
+     */
+    public function existInFieldsValidated(
+        $key,
+        $model
+    ) {
+        $fields = $this->getQueryFieldsValidated($model);
+
+        if (!empty($fields)) {
+            return array_has($fields, $key);
+        }
+
+        return TRUE;
+    }
+
+    /**
+     * @param $keyRelation
+     * @param $key
+     *
+     * @return bool
+     */
+    public function existInEmbedFields(
+        $keyRelation,
+        $key
+    ) {
+        if (!array_has($this->getQueryEmbed(), $keyRelation)) {
+            return FALSE;
+        }
+
+        $embedPerRelation = array_get($this->getQueryEmbed(), $keyRelation, []);
+
+        if (!empty($embedPerRelation)) {
+            return array_has($embedPerRelation, $key);
+        }
+
+        return TRUE;
+    }
+
+    /**
+     * @param $keyRelation
+     * @param $key
+     * @param $model
+     *
+     * @return bool
+     */
+    public function existInEmbedFieldsValidated(
+        $keyRelation,
+        $key,
+        $model
+    ) {
+        if (!array_has($this->getQueryEmbed(), $keyRelation)) {
+            return FALSE;
+        }
+
+        $embedPerRelation = $this->getQueryEmbedFieldsValidate($model, $keyRelation);
+
+        if (!empty($embedPerRelation)) {
+            return array_has($embedPerRelation, $key);
+        }
+
+        return TRUE;
+    }
+
+    /**
      * Proceso para la seleccion de los datos
      *
      * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $query
@@ -562,8 +654,10 @@ class ApiRestHelper
      *
      * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
      */
-    private function apiFields($query, $model)
-    {
+    private function apiFields(
+        $query,
+        $model
+    ) {
         $convertedFields = $this->getQueryFieldsValidated($model);
 
         // Verificamos si la selecciones reales tiene contenido para evitar hacer una consulta innecesaria
@@ -585,8 +679,11 @@ class ApiRestHelper
      *
      * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
      */
-    private function apiFilter($query, $model, $blockFilter = [])
-    {
+    private function apiFilter(
+        $query,
+        $model,
+        $blockFilter = []
+    ) {
         $convertedFilters = $this->getQueryFiltersValidated($model);
 
         // Obtengo los casteos del "Model"
@@ -633,8 +730,10 @@ class ApiRestHelper
      *
      * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
      */
-    private function apiSort($query, $model)
-    {
+    private function apiSort(
+        $query,
+        $model
+    ) {
         $convertedSorts = $this->getQuerySortsValidated($model);
 
         foreach ($convertedSorts as $key => $value) {
