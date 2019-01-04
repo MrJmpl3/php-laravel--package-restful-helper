@@ -89,7 +89,13 @@ class ApiRestHelper
             // Obtengo la columna real segun el "apiTransforms"
             // Si no encuentra es el "apiTransforms" se entiende que es una columna real
 
-            $validatedColumn = array_get($apiTransforms, $field, $field);
+            $validatedColumn = '';
+
+            if (in_array($field, array_values($apiTransforms))) {
+                $validatedColumn = array_search($field, $apiTransforms);
+            } else {
+                $validatedColumn = $field;
+            }
 
             // Validamos que la columna real existe en la tabla
 
@@ -128,7 +134,7 @@ class ApiRestHelper
             // Verifico que la peticion no sea una consulta reservada
 
             if ($key !== 'sort' && $key !== 'fields' && $key !== 'embed' && $key !== 'paginate') {
-                $filters = array_add($filters, $key, $value);
+                $filters[$key] = $value;
             }
         }
 
@@ -191,7 +197,13 @@ class ApiRestHelper
             // Obtengo la columna real segun el "apiTransforms"
             // Si no encuentra es el "apiTransforms" se entiende que es una columna real
 
-            $validatedColumn = array_get($apiTransforms, $key, $key);
+            $validatedColumn = '';
+
+            if (in_array($key, array_values($apiTransforms))) {
+                $validatedColumn = array_search($key, $apiTransforms);
+            } else {
+                $validatedColumn = $key;
+            }
 
             // Validamos que la columna real existe en la tabla y no este excluido
 
@@ -220,9 +232,9 @@ class ApiRestHelper
 
                 if ($lenQuerySort > 0) {
                     if (substr($querySort, 0, 1) === '-') {
-                        $sorts = array_add($sorts, substr($querySort, 1, $lenQuerySort - 1), 'desc');
+                        $sorts[substr($querySort, 1, $lenQuerySort - 1)] = 'desc';
                     } else {
-                        $sorts = array_add($sorts, $querySort, 'asc');
+                        $sorts[$querySort] = 'asc';
                     }
                 }
             }
@@ -279,7 +291,13 @@ class ApiRestHelper
             // Obtengo la columna real segun el "apiTransforms"
             // Si no encuentra es el "apiTransforms" se entiende que es una columna real
 
-            $convertedColumn = array_get($apiTransforms, $key, $key);
+            $convertedColumn = '';
+
+            if (in_array($key, array_values($apiTransforms))) {
+                $convertedColumn = array_search($key, $apiTransforms);
+            } else {
+                $convertedColumn = $key;
+            }
 
             // Validamos que la columna real existe en la tabla
 
@@ -443,7 +461,13 @@ class ApiRestHelper
             // Obtengo la columna real segun el "apiTransforms"
             // Si no encuentra es el "apiTransforms" se entiende que es una columna real
 
-            $validatedColumn = array_get($apiTransforms, $fieldFromEmbed, $fieldFromEmbed);
+            $validatedColumn = '';
+
+            if (in_array($fieldFromEmbed, array_values($apiTransforms))) {
+                $validatedColumn = array_search($fieldFromEmbed, $apiTransforms);
+            } else {
+                $validatedColumn = $fieldFromEmbed;
+            }
 
             // Validamos que la columna real existe en la tabla
 
@@ -612,7 +636,7 @@ class ApiRestHelper
             return FALSE;
         }
 
-        $embedPerRelation = array_get($this->getQueryEmbed(), $keyRelation, []);
+        $embedPerRelation = ($this->getQueryEmbed())[$keyRelation];
 
         if (!empty($embedPerRelation)) {
             return in_array($key, $embedPerRelation);
