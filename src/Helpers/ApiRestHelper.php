@@ -11,7 +11,6 @@
 namespace MrJmpl3\Laravel_Restful_Helper\Helpers;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -94,7 +93,7 @@ class ApiRestHelper
 
             // Validamos que la columna real existe en la tabla
 
-            if (Arr::exists($columns, $validatedColumn)) {
+            if (in_array($validatedColumn, $columns)) {
 
                 // Ya que si existe lo agregamos a la lista de seleccion
 
@@ -196,7 +195,7 @@ class ApiRestHelper
 
             // Validamos que la columna real existe en la tabla y no este excluido
 
-            if (Arr::exists($columns, $validatedColumn) && !Arr::exists($apiExcludeFilter, $validatedColumn)) {
+            if (in_array($validatedColumn, $columns) && !in_array($validatedColumn, $apiExcludeFilter)) {
 
                 // Ya que si existe lo agregamos a la lista de "filters"
 
@@ -284,7 +283,7 @@ class ApiRestHelper
 
             // Validamos que la columna real existe en la tabla
 
-            if (Arr::exists($columns, $convertedColumn)) {
+            if (in_array($convertedColumn, $columns)) {
 
                 // Ya que si existe lo agregamos a la lista de "sorts"
 
@@ -395,7 +394,7 @@ class ApiRestHelper
 
             // Verifico que el metodo existe en el "Model" y verifico que la relacion obtenida esta permitido en el "Model"
 
-            if (method_exists($model, $key) && (Arr::exists($apiAcceptRelations, $key))) {
+            if (method_exists($model, $key) && (in_array($key, $apiAcceptRelations))) {
                 $embedValidated[$key] = $val;
             }
         }
@@ -448,7 +447,7 @@ class ApiRestHelper
 
             // Validamos que la columna real existe en la tabla
 
-            if (Arr::exists($columns, $validatedColumn)) {
+            if (in_array($validatedColumn, $columns)) {
 
                 // Ya que si existe lo agregamos a la lista de seleccion
 
@@ -574,7 +573,7 @@ class ApiRestHelper
         $fields = $this->getQueryFields();
 
         if (!empty($fields)) {
-            return Arr::exists($fields, $key);
+            return in_array($key, $fields);
         }
 
         return TRUE;
@@ -593,7 +592,7 @@ class ApiRestHelper
         $fields = $this->getQueryFieldsValidated($model);
 
         if (!empty($fields)) {
-            return Arr::exists($fields, $key);
+            return in_array($key, $fields);
         }
 
         return TRUE;
@@ -609,14 +608,14 @@ class ApiRestHelper
         $keyRelation,
         $key
     ) {
-        if (!Arr::exists($this->getQueryEmbed(), $keyRelation)) {
+        if (!array_key_exists($keyRelation, $this->getQueryEmbed())) {
             return FALSE;
         }
 
         $embedPerRelation = array_get($this->getQueryEmbed(), $keyRelation, []);
 
         if (!empty($embedPerRelation)) {
-            return Arr::exists($embedPerRelation, $key);
+            return in_array($key, $embedPerRelation);
         }
 
         return TRUE;
@@ -634,14 +633,14 @@ class ApiRestHelper
         $key,
         $model
     ) {
-        if (!Arr::exists($this->getQueryEmbed(), $keyRelation)) {
+        if (!array_key_exists($keyRelation, $this->getQueryEmbed())) {
             return FALSE;
         }
 
         $embedPerRelation = $this->getQueryEmbedFieldsValidate($model, $keyRelation);
 
         if (!empty($embedPerRelation)) {
-            return Arr::exists($embedPerRelation, $key);
+            return in_array($key, $embedPerRelation);
         }
 
         return TRUE;
@@ -691,7 +690,7 @@ class ApiRestHelper
         $casts = $model->getCasts();
 
         foreach ($convertedFilters as $key => $value) {
-            if (!Arr::exists($blockFilter, $key)) {
+            if (!array_key_exists($key, $blockFilter)) {
                 if ($value === '') {
                     $query = $query->where($key, '=', NULL);
                 } else {
