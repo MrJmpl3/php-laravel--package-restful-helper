@@ -11,6 +11,7 @@
 namespace MrJmpl3\Laravel_Restful_Helper\Helpers;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -93,7 +94,7 @@ class ApiRestHelper
 
             // Validamos que la columna real existe en la tabla
 
-            if (array_has($columns, $validatedColumn)) {
+            if (Arr::exists($columns, $validatedColumn)) {
 
                 // Ya que si existe lo agregamos a la lista de seleccion
 
@@ -195,7 +196,7 @@ class ApiRestHelper
 
             // Validamos que la columna real existe en la tabla y no este excluido
 
-            if (array_has($columns, $validatedColumn) && !array_has($apiExcludeFilter, $validatedColumn)) {
+            if (Arr::exists($columns, $validatedColumn) && !Arr::exists($apiExcludeFilter, $validatedColumn)) {
 
                 // Ya que si existe lo agregamos a la lista de "filters"
 
@@ -204,6 +205,7 @@ class ApiRestHelper
         }
 
         // Retorno los filtros convertidos
+
         return $validatedFilters;
     }
 
@@ -246,7 +248,6 @@ class ApiRestHelper
      */
     public function getQuerySortsValidated($model)
     {
-
         // Obtengo los "sorts" de la peticion
 
         $sorts = $this->getQuerySorts();
@@ -283,7 +284,7 @@ class ApiRestHelper
 
             // Validamos que la columna real existe en la tabla
 
-            if (array_has($columns, $convertedColumn)) {
+            if (Arr::exists($columns, $convertedColumn)) {
 
                 // Ya que si existe lo agregamos a la lista de "sorts"
 
@@ -394,7 +395,7 @@ class ApiRestHelper
 
             // Verifico que el metodo existe en el "Model" y verifico que la relacion obtenida esta permitido en el "Model"
 
-            if (method_exists($model, $key) && (array_has($apiAcceptRelations, $key))) {
+            if (method_exists($model, $key) && (Arr::exists($apiAcceptRelations, $key))) {
                 $embedValidated[$key] = $val;
             }
         }
@@ -447,7 +448,7 @@ class ApiRestHelper
 
             // Validamos que la columna real existe en la tabla
 
-            if (array_has($columns, $validatedColumn)) {
+            if (Arr::exists($columns, $validatedColumn)) {
 
                 // Ya que si existe lo agregamos a la lista de seleccion
 
@@ -573,7 +574,7 @@ class ApiRestHelper
         $fields = $this->getQueryFields();
 
         if (!empty($fields)) {
-            return array_has($fields, $key);
+            return Arr::exists($fields, $key);
         }
 
         return TRUE;
@@ -592,7 +593,7 @@ class ApiRestHelper
         $fields = $this->getQueryFieldsValidated($model);
 
         if (!empty($fields)) {
-            return array_has($fields, $key);
+            return Arr::exists($fields, $key);
         }
 
         return TRUE;
@@ -608,14 +609,14 @@ class ApiRestHelper
         $keyRelation,
         $key
     ) {
-        if (!array_has($this->getQueryEmbed(), $keyRelation)) {
+        if (!Arr::exists($this->getQueryEmbed(), $keyRelation)) {
             return FALSE;
         }
 
         $embedPerRelation = array_get($this->getQueryEmbed(), $keyRelation, []);
 
         if (!empty($embedPerRelation)) {
-            return array_has($embedPerRelation, $key);
+            return Arr::exists($embedPerRelation, $key);
         }
 
         return TRUE;
@@ -633,14 +634,14 @@ class ApiRestHelper
         $key,
         $model
     ) {
-        if (!array_has($this->getQueryEmbed(), $keyRelation)) {
+        if (!Arr::exists($this->getQueryEmbed(), $keyRelation)) {
             return FALSE;
         }
 
         $embedPerRelation = $this->getQueryEmbedFieldsValidate($model, $keyRelation);
 
         if (!empty($embedPerRelation)) {
-            return array_has($embedPerRelation, $key);
+            return Arr::exists($embedPerRelation, $key);
         }
 
         return TRUE;
@@ -690,7 +691,7 @@ class ApiRestHelper
         $casts = $model->getCasts();
 
         foreach ($convertedFilters as $key => $value) {
-            if (!array_has($blockFilter, $key)) {
+            if (!Arr::exists($blockFilter, $key)) {
                 if ($value === '') {
                     $query = $query->where($key, '=', NULL);
                 } else {
