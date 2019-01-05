@@ -134,3 +134,11 @@
 
 - Core
     - Fix some bugs in exists and search arrays
+    
+## v3.0.0
+
+### Changed
+
+- Core
+    - Use the facades ApiRestHelper
+    - All functions was rewrite

@@ -12,32 +12,28 @@ $ composer require mrjmpl3/laravel-restful-helper
 
 - **To packages to works correctly:**
 
-	- Add next Trait:
+	- In config/app.php, add the facades:
 	
 		``` php
-		use MrJmpl3\Laravel_Restful_Helper\Traits\ApiTrait;
+		'aliases' => [
+		    'ApiRestHelper' => \MrJmpl3\Laravel_Restful_Helper\Facades\ApiRestHelper::class,
+		],
 		```
 		
 	- And use like next example to Resource Collection:
 	
 		``` php
 		public function index() {
-			$products = new Product();
-			$products = $this->executeApiResponseToRC($products);
-				
-			return new ProductResourceCollection($products);
+		    $products = new Product();
+		    $products = ApiRestHelper::responseToResourceCollection($products);
+		    
+		    return new ProductResourceCollection($products);
 		}
 		```
 		
 - **To packages to works correctly with Builder Query:**
 
-    - Add next Trait:
-	
-		``` php
-		use MrJmpl3\Laravel_Restful_Helper\Traits\ApiTrait;
-		```
-		
-	- And use like next example to Resource Collection:
+	- To Resource Collection:
 	
 		``` php
 		public function index() {
@@ -45,18 +41,18 @@ $ composer require mrjmpl3/laravel-restful-helper
 		    // The second param is 'custom block filter' prevent to query override the builder select
 		    
 		    $products = Product::where('state', = , 1);
-		    $products = $this->executeApiResponseFromBuilderToRC($products, ['state']);
+		    $products = ApiRestHelper::responseFromBuilderToResourceCollection($products, ['state']);
 		    
 		    return new ProductResourceCollection($products);
 		}
 		```
 		
-	- And use like next example to Resource:
+	- To Resource:
 	
 		``` php
 		public function index() {
 		    $product = Product::where('state', = , 1);
-		    $product = $this->executeApiResponseFromBuilderToResource($product);
+		    $product = ApiRestHelper::responseFromBuilderToResource($product);
 		    
 		    return new ProductoResource($product);
 		}
@@ -76,24 +72,34 @@ $ composer require mrjmpl3/laravel-restful-helper
     - In the API Resources, use the function embed
 
         ``` php
-        $embedRequest = $this->embed($this);
+        $embed = ApiRestHelper::getQueryEmbed();
         
         return [
             'id' => $this->id,
             'name' => $this->name,
-            $this->mergeWhen(array_key_exists('post', $embedRequest), [
-                'post' => $this->getPostResource($embedRequest),
+            $this->mergeWhen(array_key_exists('post', $embed), [
+                'post' => $this->getPostResource($embed),
             ]),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
         
         private function getPostResource($embedRequest) {
-            $postRelation = null;
-            if (array_key_exists('post', $embedRequest)) {
-                $postRelation = new PostResource($this->apiFieldsFromArrayToResource($this->post(), $embedRequest['post'])->first());
+            $postResource = NULL;
+            
+            if (array_key_exists('local', $embed)) {
+                $postRelation = $this->local();
+                
+                $fieldsFromEmbed = ApiRestHelper::getQueryEmbedFieldsValidate($postRelation->getModel(), 'post');
+                
+                if(!empty($fieldsFromEmbed)) {
+                    $postResource = new PostResource($postRelation->select($fieldsFromEmbed)->first());
+                } else {
+                    $postResource = new PostResource($postRelation->first());
+                }
             }
-            return $postRelation;
+        
+            return $postResource;
         }
     	```
     		
@@ -109,35 +115,29 @@ $ composer require mrjmpl3/laravel-restful-helper
 		
 		Where 'id' is the db column name , and 'code' is the column rename to response
 	
-	- In the API Resources, use the array $transforms
+	- In the API Resources, use the array $apiTransforms
 	
 		``` php
 		return [
-			$this->apiTransforms['id'] => $this->id,
-			'name' => $this->name,
-			'created_at' => $this->created_at,
-			'updated_at' => $this->updated_at,
+		    $this->apiTransforms['id'] => $this->id,
+		    'name' => $this->name,
+		    'created_at' => $this->created_at,
+		    'updated_at' => $this->updated_at,
 		];
 		```
 		
 - **To used fields in API Resources , You can combine with transformers fields**
 
-	- Add next Trait:
-	
-    	``` php
-    	use MrJmpl3\Laravel_Restful_Helper\Traits\ApiTrait;
-    	```
-    	
     - Used the mergeWhen function like next example:
     
     	``` php
     	return [
-    		$this->mergeWhen(is_null($this->id), [
-    			$this->transforms['id'] => $this->id
-    		]),
-    		$this->mergeWhen(is_null($this->name), [
-    			'name' => $this->name
-    		]),
+    	    $this->mergeWhen(ApiRestHelper::existInFields($this->transforms['id']) && !is_null($this->id), [
+    	        $this->transforms['id'] => $this->id
+    	    ]),
+    	    $this->mergeWhen(ApiRestHelper::existInFields('name') && !is_null($this->name), [
+    	        'name' => $this->name
+    	    ]),
     	 ]
     	```
     		
@@ -147,7 +147,7 @@ $ composer require mrjmpl3/laravel-restful-helper
 	
 		``` php
 		public $apiExcludeFilter = [
-			'id'
+		    'id'
 		];
 		```
 		
@@ -178,6 +178,7 @@ $ composer require mrjmpl3/laravel-restful-helper
         
         - **Example:** /product?embed=relationfunction
         - **Example 2:** /user?embed=post.id,post.name
+        
 ## Change log
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
