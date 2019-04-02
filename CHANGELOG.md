@@ -142,3 +142,18 @@
 - Core
     - Use the facades ApiRestHelper
     - All functions was rewrite
+
+## v3.0.1
+
+### Fix
+
+- Core:
+    - Fix the LICENSE
+    - Add optional paramether $customApiTransforms , this paramether override the $apiTransforms from the Model, is apply in:
+        - getQuerySortsValidated()
+        - getQueryEmbedFieldsValidate()
+        - responseFromBuilderToResource()
+        - existInFieldsValidated()
+        - apiFields()
+        - apiFilter()
+        - apiSort()
