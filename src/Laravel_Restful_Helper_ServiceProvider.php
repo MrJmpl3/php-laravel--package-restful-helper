@@ -24,7 +24,7 @@ class Laravel_Restful_Helper_ServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->publishes([
             __DIR__ . '/Config/restful-helper.php' => config_path('restful-helper.php'),
@@ -36,7 +36,7 @@ class Laravel_Restful_Helper_ServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/Config/restful-helper.php', 'restful_helper');
 

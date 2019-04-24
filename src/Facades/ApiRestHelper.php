@@ -12,8 +12,16 @@ namespace MrJmpl3\Laravel_Restful_Helper\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
+/**
+ * Class ApiRestHelper
+ *
+ * @package MrJmpl3\Laravel_Restful_Helper\Facades
+ */
 class ApiRestHelper extends Facade
 {
+    /**
+     * {@inheritDoc}
+     */
     protected static function getFacadeAccessor()
     {
         return '\MrJmpl3\Laravel_Restful_Helper\Helpers\ApiRestHelper';

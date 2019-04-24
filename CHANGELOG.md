@@ -157,3 +157,10 @@
         - apiFields()
         - apiFilter()
         - apiSort()
+
+## v3.0.2
+
+### Fix
+
+- Core
+    - Fix docs

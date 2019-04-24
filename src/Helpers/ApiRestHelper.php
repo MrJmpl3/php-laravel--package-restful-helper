@@ -61,8 +61,10 @@ class ApiRestHelper
      *
      * @return array
      */
-    public function getQueryFieldsValidated($model, ?array $customApiTransforms = null): array
-    {
+    public function getQueryFieldsValidated(
+        $model,
+        ?array $customApiTransforms = null
+    ): array {
         // We get the fields of the request
         $fields = $this->getQueryFields();
 
@@ -157,8 +159,10 @@ class ApiRestHelper
      *
      * @return array
      */
-    public function getQueryFiltersValidated($model, ?array $customApiTransforms = null): array
-    {
+    public function getQueryFiltersValidated(
+        $model,
+        ?array $customApiTransforms = null
+    ): array {
         // We get the "filter" of the request
         $filters = $this->getQueryFilters();
 
@@ -260,8 +264,10 @@ class ApiRestHelper
      *
      * @return array
      */
-    public function getQuerySortsValidated($model, ?array $customApiTransforms = null): array
-    {
+    public function getQuerySortsValidated(
+        $model,
+        ?array $customApiTransforms = null
+    ): array {
         // Get the sorts of the request
         $sorts = $this->getQuerySorts();
 
@@ -380,8 +386,10 @@ class ApiRestHelper
      *
      * @return array
      */
-    public function getQueryEmbedValidated($model, bool $forced = false): array
-    {
+    public function getQueryEmbedValidated(
+        $model,
+        bool $forced = false
+    ): array {
         $embed = $this->getQueryEmbed();
 
         $apiAcceptRelations = [];
@@ -415,8 +423,11 @@ class ApiRestHelper
      *
      * @return array
      */
-    public function getQueryEmbedFieldsValidate(Model $model, string $key, ?array $customApiTransforms = null): array
-    {
+    public function getQueryEmbedFieldsValidate(
+        Model $model,
+        string $key,
+        ?array $customApiTransforms = null
+    ): array {
         $embed = $this->getQueryEmbed();
 
         $fieldsFromEmbed = array_get($embed, $key, []);
@@ -476,8 +487,11 @@ class ApiRestHelper
      *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
      */
-    public function responseToResourceCollection($model, array $ignoreFilters = [], ?array $customApiTransformers = null)
-    {
+    public function responseToResourceCollection(
+        $model,
+        array $ignoreFilters = [],
+        ?array $customApiTransformers = null
+    ) {
         // The Model is copied to maintain an immutability
         $query = $model;
 
@@ -509,8 +523,11 @@ class ApiRestHelper
      *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
      */
-    public function responseFromBuilderToResourceCollection($builder, $ignoreFilters = [], ?array $customApiTransformers = null)
-    {
+    public function responseFromBuilderToResourceCollection(
+        $builder,
+        $ignoreFilters = [],
+        ?array $customApiTransformers = null
+    ) {
         $model = $builder->getModel();
         $query = $builder;
 
@@ -541,8 +558,10 @@ class ApiRestHelper
      *
      * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function responseFromBuilderToResource($builder, $customApiTransforms = null): ?Model
-    {
+    public function responseFromBuilderToResource(
+        $builder,
+        $customApiTransforms = null
+    ): ?Model {
         $model = $builder->getModel();
 
         $fields = $this->getQueryFieldsValidated($model, $customApiTransforms);
@@ -579,8 +598,11 @@ class ApiRestHelper
      *
      * @return bool
      */
-    public function existInFieldsValidated($key, $model, $customApiTransforms = null): bool
-    {
+    public function existInFieldsValidated(
+        $key,
+        $model,
+        $customApiTransforms = null
+    ): bool {
         $fields = $this->getQueryFieldsValidated($model, $customApiTransforms);
 
         if (!empty($fields)) {
@@ -596,8 +618,10 @@ class ApiRestHelper
      *
      * @return bool
      */
-    public function existInEmbedFields($keyRelation, $key): bool
-    {
+    public function existInEmbedFields(
+        $keyRelation,
+        $key
+    ): bool {
         if (!array_key_exists($keyRelation, $this->getQueryEmbed())) {
             return false;
         }
@@ -619,8 +643,12 @@ class ApiRestHelper
      *
      * @return bool
      */
-    public function existInEmbedFieldsValidated($keyRelation, $key, $model, ?array $customApiTransformers = null): bool
-    {
+    public function existInEmbedFieldsValidated(
+        $keyRelation,
+        $key,
+        $model,
+        ?array $customApiTransformers = null
+    ): bool {
         if (!array_key_exists($keyRelation, $this->getQueryEmbed())) {
             return false;
         }
@@ -642,8 +670,11 @@ class ApiRestHelper
      *
      * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
      */
-    private function apiFields($query, $model, $customApiTransforms = null)
-    {
+    private function apiFields(
+        $query,
+        $model,
+        $customApiTransforms = null
+    ) {
         $convertedFields = $this->getQueryFieldsValidated($model, $customApiTransforms);
 
         // Check if the real selections have content to avoid making an unnecessary query
@@ -663,8 +694,12 @@ class ApiRestHelper
      *
      * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
      */
-    private function apiFilter($query, $model, array $ignoreFilters = [], $customApiTransforms = null)
-    {
+    private function apiFilter(
+        $query,
+        $model,
+        array $ignoreFilters = [],
+        $customApiTransforms = null
+    ) {
         $convertedFilters = $this->getQueryFiltersValidated($model, $customApiTransforms);
 
         // Get the casts of the Model
@@ -713,8 +748,11 @@ class ApiRestHelper
      *
      * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder
      */
-    private function apiSort($query, $model, $customApiTransforms = null)
-    {
+    private function apiSort(
+        $query,
+        $model,
+        $customApiTransforms = null
+    ) {
         $convertedSorts = $this->getQuerySortsValidated($model, $customApiTransforms);
 
         foreach ($convertedSorts as $key => $value) {
@@ -737,7 +775,7 @@ class ApiRestHelper
 
         if (array_get($paginateArr, 'paginate', true)) {
             return $query->paginate(array_get($paginateArr, 'per_page', 15))
-                ->appends(request()->all());
+                         ->appends(request()->all());
         }
 
         return $query->get();
