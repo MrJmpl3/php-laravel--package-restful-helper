@@ -149,6 +149,7 @@
 
 - Core:
     - Fix the LICENSE
+    - Fix docs
     - Add optional paramether $customApiTransforms , this paramether override the $apiTransforms from the Model, is apply in:
         - getQuerySortsValidated()
         - getQueryEmbedFieldsValidate()
@@ -157,10 +158,3 @@
         - apiFields()
         - apiFilter()
         - apiSort()
-
-## v3.0.2
-
-### Fix
-
-- Core
-    - Fix docs
