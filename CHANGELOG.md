@@ -158,3 +158,10 @@
         - apiFields()
         - apiFilter()
         - apiSort()
+
+## v3.1.0
+
+### Feat
+
+- Core
+    - Support Laravel 5, 6 and 7
