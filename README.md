@@ -10,174 +10,149 @@ $ composer require mrjmpl3/laravel-restful-helper
 
 ## Usage
 
-- **To packages to works correctly:**
+This packages make queries depends of the request, like GraphQL.
 
-	- In config/app.php, add the facades:
-	
-		``` php
-		'aliases' => [
-		    'ApiRestHelper' => \MrJmpl3\Laravel_Restful_Helper\Facades\ApiRestHelper::class,
-		],
-		```
-		
-	- And use like next example to Resource Collection:
-	
-		``` php
-		public function index() {
-		    $products = new Product();
-		    $products = ApiRestHelper::responseToResourceCollection($products);
-		    
-		    return new ProductResourceCollection($products);
-		}
-		```
-		
-- **To packages to works correctly with Builder Query:**
+### Requests
 
-	- To Resource Collection:
-	
-		``` php
-		public function index() {
-		    // Important! Don't close the query with get() or paginate()
-		    // The second param is 'custom block filter' prevent to query override the builder select
-		    
-		    $products = Product::where('state', = , 1);
-		    $products = ApiRestHelper::responseFromBuilderToResourceCollection($products, ['state']);
-		    
-		    return new ProductResourceCollection($products);
-		}
-		```
-		
-	- To Resource:
-	
-		``` php
-		public function index() {
-		    $product = Product::where('state', = , 1);
-		    $product = ApiRestHelper::responseFromBuilderToResource($product);
-		    
-		    return new ProductoResource($product);
-		}
-        ```
-        
-- **To packages to works correctly with Relations:**
+- **Filter data:** /product?column=value&column2=value2
+- **Sort data:** /product?sort=-column1,column2
+    - With the negative prefix = desc
+    - Without the negative prefix = asc
+- **Fields o Select data:** /product?fields=column1,column2,column3,column4
+- **Paginate and Per Page:** /product?paginate=true&per_page=5
+- **Embed:** /product?embed=relationfunction
+
+### Code
+
+#### To Collection
+
+```
+// Create a simple instance of model where you want apply the queries
+$model = new Product();
+$responseHelper = new ApiRestHelper($model);
+          
+// The method 'toCollection' return a collection with all data filtered
+$response = $responseHelper->toCollection();
+```
+      
+#### To Model
+
+```
+// Create a simple instance of model where you want apply the queries
+$model = new Product();           
+$responseHelper = new ApiRestHelper($model);
+                
+// The method 'toModel' return a model with all data filtered
+$response = $responseHelper->toModel();
+```
+      
+#### From Builder to Collection
+
+```
+// Important! Don't close the query with get() or paginate()
+$query = Product::where('state', = , 1);
+$responseHelper = new ApiRestHelper($query);
+          
+// The method 'toCollection' return a collection with all data filtered
+$response = $responseHelper->toCollection();
+```
+      
+#### Relations
+
+- In model, add array like next example:
+
+    ```
+    public $apiAcceptRelations = [
+        'post'
+    ];
+    ```
+    Where 'post' is the function name of relation
+                
+- In the API Resources, use the function embed
     
-    - In model, add array like next example:
-        ``` php
-        public $apiAcceptRelations = [
-            'post'
-        ];
-    	```
-    	
-    	Where 'post' is the function name of relation
-    		
-    - In the API Resources, use the function embed
-
-        ``` php
-        $embed = ApiRestHelper::getQueryEmbed();
-        
+    ```
+    public function toArray($request) {
+        $embed = (new ApiRestHelper)->getEmbedValidated();
+                
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            $this->mergeWhen(array_key_exists('post', $embed), [
-                'post' => $this->getPostResource($embed),
-            ]),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+          'id' => $this->id,
+          'name' => $this->name,
+          $this->mergeWhen(array_key_exists('post', $embed), [
+              'post' => $this->getPostResource($embed),
+          ]),
+          'created_at' => $this->created_at,
+          'updated_at' => $this->updated_at,
         ];
-        
-        private function getPostResource($embedRequest) {
-            $postResource = NULL;
+    }
             
-            if (array_key_exists('local', $embed)) {
-                $postRelation = $this->local();
+    private function getPostResource($embedRequest) {
+      $postResource = NULL;
                 
-                $fieldsFromEmbed = ApiRestHelper::getQueryEmbedFieldsValidate($postRelation->getModel(), 'post');
-                
-                if(!empty($fieldsFromEmbed)) {
-                    $postResource = new PostResource($postRelation->select($fieldsFromEmbed)->first());
-                } else {
-                    $postResource = new PostResource($postRelation->first());
-                }
-            }
-        
-            return $postResource;
-        }
-    	```
-    		
-- **To transformers fields works with this package:**
-
-	- In model, add array like next example:
-	
-		``` php
-		public $apiTransforms = [
-		    'id' => 'code'
-		];
-		```
-		
-		Where 'id' is the db column name , and 'code' is the column rename to response
-	
-	- In the API Resources, use the array $apiTransforms
-	
-		``` php
-		return [
-		    $this->apiTransforms['id'] => $this->id,
-		    'name' => $this->name,
-		    'created_at' => $this->created_at,
-		    'updated_at' => $this->updated_at,
-		];
-		```
-		
-- **To used fields in API Resources , You can combine with transformers fields**
-
-    - Used the mergeWhen function like next example:
-    
-    	``` php
-    	return [
-    	    $this->mergeWhen(ApiRestHelper::existInFields($this->transforms['id']) && !is_null($this->id), [
-    	        $this->transforms['id'] => $this->id
-    	    ]),
-    	    $this->mergeWhen(ApiRestHelper::existInFields('name') && !is_null($this->name), [
-    	        'name' => $this->name
-    	    ]),
-    	 ]
-    	```
-    		
-- **To exclude fields in filter with this package:**
-
-	- In model, add array like next example:
-	
-		``` php
-		public $apiExcludeFilter = [
-		    'id'
-		];
-		```
-		
-		Where 'id' is the db column name to exclude
-	
-- **To request:**
-
-	- **Filter data:** 
-	
-		- **Example:** /product?column=value&column2=value2
-		
-	- **Sort data:**
-	
-		- **Example:** /product?sort=-column1,column2
-		
-			- With the negative prefix = desc
-            - Without the negative prefix = asc
+      if (array_key_exists('local', $embed)) {
+          $postRelation = $this->local();                    
+          $fieldsFromEmbed = (new ApiRestHelper($postRelation->getModel()))->getEmbedFieldTransformed('post');
+                    
+          if(!empty($fieldsFromEmbed)) {
+              $postResource = new PostResource($postRelation->select($fieldsFromEmbed)->first());
+          } else {
+              $postResource = new PostResource($postRelation->first());
+          }
+      }
             
-    - **Fields o Select data:**
+      return $postResource;
+    }
+    ```
+#### Transformers
+
+- In model, add array like next example:
+	
+```
+public $apiTransforms = [
+    'id' => 'code'
+];
+```
+		
+Where 'id' is the db column name , and 'code' is the column rename to response
+	
+- In the API Resources, use the array $apiTransforms
+	
+```
+$apiHelper = new ApiRestHelper($this);
+
+return [
+    $apiHelper->getKeyTransformed('id') => $this->id,
+    'name' => $this->name,
+    'created_at' => $this->created_at,
+    'updated_at' => $this->updated_at,
+];
+```
+
+- To used fields in API Resources , You can combine with transformers fields
     
-    	- **Example:** /product?fields=column1,column2,column3,column4
-    	
-    - **Paginate and Per Page:**
-    
-    	- **Example:** /product?paginate=true&per_page=5
-    	
-    - **Embed:**
-        
-        - **Example:** /product?embed=relationfunction
-        - **Example 2:** /user?embed=post.id,post.name
+```
+$apiHelper = new ApiRestHelper($this);
+
+return [
+    $this->mergeWhen($apiHelper->existInFieldsTransformed('id') && !is_null($this->id), [
+        $this->transforms['id'] => $this->id
+    ]),
+    $this->mergeWhen($apiHelper->existInFieldsTransformed('name') && !is_null($this->name), [
+        'name' => $this->name
+    ]),
+]
+```
+
+#### Exclude Fields in Filter
+
+- In model, add array like next example:
+	
+```
+public $apiExcludeFilter = [
+    'id'
+];
+```
+		
+Where 'id' is the db column name to exclude
         
 ## Change log
 
