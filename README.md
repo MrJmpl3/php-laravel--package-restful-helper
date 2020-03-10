@@ -72,7 +72,7 @@ $response = $responseHelper->toCollection();
     
     ```
     public function toArray($request) {
-        $embed = (new ApiRestHelper)->getEmbedValidated();
+        $embed = (new ApiRestHelper)->getEmbed();
                 
         return [
           'id' => $this->id,
@@ -90,7 +90,7 @@ $response = $responseHelper->toCollection();
                 
       if (array_key_exists('local', $embed)) {
           $postRelation = $this->local();                    
-          $fieldsFromEmbed = (new ApiRestHelper($postRelation->getModel()))->getEmbedFieldTransformed('post');
+          $fieldsFromEmbed = (new ApiRestHelper($postRelation->getModel()))->getEmbedField('post');
                     
           if(!empty($fieldsFromEmbed)) {
               $postResource = new PostResource($postRelation->select($fieldsFromEmbed)->first());
@@ -133,10 +133,10 @@ return [
 $apiHelper = new ApiRestHelper($this);
 
 return [
-    $this->mergeWhen($apiHelper->existInFieldsTransformed('id') && !is_null($this->id), [
+    $this->mergeWhen($apiHelper->existInFields('id') && !is_null($this->id), [
         $this->transforms['id'] => $this->id
     ]),
-    $this->mergeWhen($apiHelper->existInFieldsTransformed('name') && !is_null($this->name), [
+    $this->mergeWhen($apiHelper->existInFields('name') && !is_null($this->name), [
         'name' => $this->name
     ]),
 ]
