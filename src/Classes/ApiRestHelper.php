@@ -158,7 +158,7 @@ class ApiRestHelper
      *
      * @return array
      */
-    public function getFields(): array
+    public function getFieldsRequest(): array
     {
         $fields = [];
 
@@ -170,36 +170,12 @@ class ApiRestHelper
     }
 
     /**
-     * Returns the fields of the request but the values was transformed to original value
-     *
-     * @return array
-     */
-    public function getFieldsTransformed(): array
-    {
-        $fields = $this->getFields();
-        $attributes = $this->getAttributesOfModel();
-
-        $fieldsTransformed = [];
-
-        foreach ($fields as $field) {
-            $attribute = in_array($field, array_values($this->transformers), true) ? array_search($field, $this->transformers, true) : $field;
-
-            if (in_array($attribute, $attributes, false)) {
-                $fieldsTransformed[] = $attribute;
-            }
-
-        }
-
-        return $fieldsTransformed;
-    }
-
-    /**
      * Returns the filters of the request in an array associative
      * Example: ["column": "value", "column2": "value2"]
      *
      * @return array
      */
-    public function getFilters(): array
+    public function getFiltersRequest(): array
     {
         $requests = request()->all();
 
@@ -215,35 +191,12 @@ class ApiRestHelper
     }
 
     /**
-     * Returns the filters of the request but the keys was transformed to original value
-     *
-     * @return array
-     */
-    public function getFiltersTransformed(): array
-    {
-        $filters = $this->getFilters();
-        $attributes = $this->getAttributesOfModel();
-
-        $filtersTransformed = [];
-
-        foreach ($filters as $key => $value) {
-            $attribute = in_array($key, array_values($this->transformers), true) ? array_search($key, $this->transformers, false) : $key;
-
-            if (in_array($attribute, $attributes, false) && !in_array($attribute, $this->excludeFilter, false)) {
-                $filtersTransformed = Arr::add($filtersTransformed, $attribute, $value);
-            }
-        }
-
-        return $filtersTransformed;
-    }
-
-    /**
      * Return the sorts of the request
      * Example: ["column1": "desc", "column2": "asc"]
      *
      * @return array
      */
-    public function getSorts(): array
+    public function getSortsRequest(): array
     {
         $sorts = [];
 
@@ -267,13 +220,86 @@ class ApiRestHelper
     }
 
     /**
+     * @return array
+     */
+    public function getEmbedRequest(): array
+    {
+        $embedRelations = [];
+
+        if (request()->has('embed')) {
+            $embedRelations = explode(',', request()->get('embed'));
+        }
+
+        $embed = [];
+
+        foreach ($embedRelations as $embedRelation) {
+            $parts = explode('.', $embedRelation);
+
+            if (count($parts) > 1) {
+                $embed[$parts[0]][] = $parts[1];
+            } else {
+                $embed[$parts[0]] = [];
+            }
+        }
+
+        return $embed;
+    }
+
+    /**
+     * Returns the fields of the request but the values was used to the select query
+     *
+     * @return array
+     */
+    public function getFields(): array
+    {
+        $fields = $this->getFieldsRequest();
+        $attributes = $this->getAttributesOfModel();
+
+        $fieldsTransformed = [];
+
+        foreach ($fields as $field) {
+            $attribute = in_array($field, array_values($this->transformers), true) ? array_search($field, $this->transformers, true) : $field;
+
+            if (in_array($attribute, $attributes, true)) {
+                $fieldsTransformed[] = $attribute;
+            }
+
+        }
+
+        return $fieldsTransformed;
+    }
+
+    /**
+     * Returns the filters of the request but the keys was transformed to original value
+     *
+     * @return array
+     */
+    public function getFilters(): array
+    {
+        $filters = $this->getFiltersRequest();
+        $attributes = $this->getAttributesOfModel();
+
+        $filtersTransformed = [];
+
+        foreach ($filters as $key => $value) {
+            $attribute = in_array($key, array_values($this->transformers), true) ? array_search($key, $this->transformers, false) : $key;
+
+            if (in_array($attribute, $attributes, false) && !in_array($attribute, $this->excludeFilter, true)) {
+                $filtersTransformed = Arr::add($filtersTransformed, $attribute, $value);
+            }
+        }
+
+        return $filtersTransformed;
+    }
+
+    /**
      * Returns the sorts of the request but the keys was transformed to original value
      *
      * @return array
      */
-    public function getSortsTransformed(): array
+    public function getSorts(): array
     {
-        $sorts = $this->getSorts();
+        $sorts = $this->getSortsRequest();
 
         $attributes = $this->getAttributesOfModel();
 
@@ -327,33 +353,7 @@ class ApiRestHelper
      */
     public function getEmbed(): array
     {
-        $embedRelations = [];
-
-        if (request()->has('embed')) {
-            $embedRelations = explode(',', request()->get('embed'));
-        }
-
-        $embed = [];
-
-        foreach ($embedRelations as $embedRelation) {
-            $parts = explode('.', $embedRelation);
-
-            if (count($parts) > 1) {
-                $embed[$parts[0]][] = $parts[1];
-            } else {
-                $embed[$parts[0]] = [];
-            }
-        }
-
-        return $embed;
-    }
-
-    /**
-     * @return array
-     */
-    public function getEmbedValidated(): array
-    {
-        $embed = $this->getEmbed();
+        $embed = $this->getEmbedRequest();
         $model = $this->getModel();
 
         $embedValidated = [];
@@ -372,9 +372,9 @@ class ApiRestHelper
      *
      * @return array
      */
-    public function getEmbedFieldTransformed(string $relationKey): array
+    public function getEmbedField(string $relationKey): array
     {
-        $embed = $this->getEmbedValidated();
+        $embed = $this->getEmbed();
         $fieldsFromEmbed = Arr::get($embed, $relationKey, []);
 
         $attributes = $this->getAttributesOfModel();
@@ -392,6 +392,19 @@ class ApiRestHelper
         return $fieldsTransformers;
     }
 
+    public function existInFieldsRequest($key): bool
+    {
+        return in_array($key, $this->getFieldsRequest(), true);
+    }
+
+    /**
+     * Check if key exists in fields
+     * When the fields are empty, return true because mean '*' in SQL
+     *
+     * @param $key
+     *
+     * @return bool
+     */
     public function existInFields($key): bool
     {
         $fields = $this->getFields();
@@ -403,20 +416,9 @@ class ApiRestHelper
         return true;
     }
 
-    public function existInFieldsTransformed($key): bool
+    public function existInEmbedFieldRequest($relationKey, $key): bool
     {
-        $fields = $this->getFieldsTransformed();
-
-        if (!empty($fields)) {
-            return in_array($key, $fields, true);
-        }
-
-        return true;
-    }
-
-    public function existInEmbedFields($relationKey, $key): bool
-    {
-        $embed = $this->getEmbed();
+        $embed = $this->getEmbedRequest();
 
         if (!array_key_exists($relationKey, $embed)) {
             return false;
@@ -424,20 +426,25 @@ class ApiRestHelper
 
         $embedPerRelation = $embed[$relationKey];
 
-        if (!empty($embedPerRelation)) {
-            return in_array($key, $embedPerRelation, false);
-        }
-
-        return true;
+        return in_array($key, $embedPerRelation, false);
     }
 
-    public function existInEmbedFieldsTransformed($relationKey, $key): bool
+    /**
+     * Check if key exists in fields of embed
+     * When the fields are empty, return true because mean '*' in SQL
+     *
+     * @param $relationKey
+     * @param $key
+     *
+     * @return bool
+     */
+    public function existInEmbedField($relationKey, $key): bool
     {
-        if (!array_key_exists($relationKey, $this->getEmbedValidated())) {
+        if (!array_key_exists($relationKey, $this->getEmbed())) {
             return false;
         }
 
-        $embedPerRelation = $this->getEmbedFieldTransformed($relationKey);
+        $embedPerRelation = $this->getEmbedField($relationKey);
 
         if (!empty($embedPerRelation)) {
             return in_array($key, $embedPerRelation, false);
@@ -471,7 +478,7 @@ class ApiRestHelper
      */
     private function apiFields($query)
     {
-        $convertedFields = $this->getFiltersTransformed();
+        $convertedFields = $this->getFields();
 
         if (count($convertedFields) > 0) {
             $query = $query->select($convertedFields);
@@ -490,7 +497,7 @@ class ApiRestHelper
         $model = $this->getModel();
         $casts = $model->getCasts();
 
-        $convertedFilters = $this->getFiltersTransformed();
+        $convertedFilters = $this->getFilters();
 
         foreach ($convertedFilters as $key => $value) {
             if ($value === '') {
@@ -530,7 +537,7 @@ class ApiRestHelper
      */
     private function apiSort($query)
     {
-        $convertedSorts = $this->getSortsTransformed();
+        $convertedSorts = $this->getSorts();
 
         foreach ($convertedSorts as $key => $value) {
             $query = $query->orderBy($key, $value);
