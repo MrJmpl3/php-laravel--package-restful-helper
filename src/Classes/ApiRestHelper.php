@@ -470,7 +470,7 @@ class ApiRestHelper
         $model = $this->getModel();
         $columns = Schema::getColumnListing($model->getTable());
 
-        return array_keys(array_diff_key($columns, array_flip($model->getHidden())));
+        return array_diff($columns, $model->getHidden());
     }
 
     /**
