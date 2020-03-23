@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder as DatabaseBuilder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -467,8 +468,9 @@ class ApiRestHelper
     private function getAttributesOfModel(): array
     {
         $model = $this->getModel();
+        $columns = Schema::getColumnListing($model->getTable());
 
-        return array_keys(array_diff_key($model->getAttributes(), array_flip($model->getHidden())));
+        return array_keys(array_diff_key($columns, array_flip($model->getHidden())));
     }
 
     /**
