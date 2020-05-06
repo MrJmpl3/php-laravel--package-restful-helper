@@ -1,6 +1,6 @@
 {
     "name": "mrjmpl3/laravel-restful-helper",
-    "version": "4.0.0-alpha.4",
+    "version": "4.0.0-alpha.5",
     "type": "library",
     "description": "Laravel Helper to Restful projects",
     "keywords": [
@@ -20,6 +20,7 @@
         }
     ],
     "require": {
+        "php": "^7.3",
         "illuminate/support": "^5.5|^6.0|^7.0",
         "illuminate/database": "^5.5|^6.0|^7.0"
     },
