@@ -1,12 +1,12 @@
 <?php
 /**
- * Copyright (c) 2019.
- * Archivo desarrollado por Jose Manuel Casani Guerra bajo el pseudonimo de MrJmpl3
+ * Copyright (c) 2020.
+ * Archivo desarrollado por Jose Manuel Casani Guerra bajo el pseudonimo de MrJmpl3.
+ *
  * Email: jmpl3.soporte@gmail.com
  * Twitter: @MrJmpl3
  * Pagina Web: https://mrjmpl3-official.es
  */
-
 namespace MrJmpl3\LaravelRestfulHelper\Classes;
 
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -20,28 +20,44 @@ use Illuminate\Validation\ValidationException;
 
 class ApiRestHelper
 {
-    /** @var mixed */
+    /**
+     * @var mixed
+     */
     private $modelOrBuilder;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     private $transformers;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     private $excludeFilter;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     private $acceptRelations;
 
-    /** @var bool */
+    /**
+     * @var bool
+     */
     private $executeFields;
 
-    /** @var bool */
+    /**
+     * @var bool
+     */
     private $executeFilter;
 
-    /** @var bool */
+    /**
+     * @var bool
+     */
     private $executeSorts;
 
-    /** @var bool */
+    /**
+     * @var bool
+     */
     private $executePaginate;
 
     /**
@@ -55,7 +71,8 @@ class ApiRestHelper
 
         if ($modelOrBuilder instanceof Model && property_exists($modelOrBuilder, 'apiTransforms')) {
             $this->transformers = $modelOrBuilder->apiTransforms;
-        } elseif ($modelOrBuilder instanceof EloquentBuilder && property_exists($modelOrBuilder->getModel(), 'apiTransforms')) {
+        } elseif ($modelOrBuilder instanceof EloquentBuilder && property_exists($modelOrBuilder->getModel(),
+                'apiTransforms')) {
             $this->transformers = $modelOrBuilder->getModel()->apiTransforms;
         } else {
             $this->transformers = [];
@@ -63,7 +80,8 @@ class ApiRestHelper
 
         if ($modelOrBuilder instanceof Model && property_exists($modelOrBuilder, 'apiExcludeFilter')) {
             $this->excludeFilter = $modelOrBuilder->apiExcludeFilter;
-        } elseif ($modelOrBuilder instanceof EloquentBuilder && property_exists($modelOrBuilder->getModel(), 'apiExcludeFilter')) {
+        } elseif ($modelOrBuilder instanceof EloquentBuilder && property_exists($modelOrBuilder->getModel(),
+                'apiExcludeFilter')) {
             $this->excludeFilter = $modelOrBuilder->getModel()->apiExcludeFilter;
         } else {
             $this->excludeFilter = [];
@@ -71,7 +89,8 @@ class ApiRestHelper
 
         if ($modelOrBuilder instanceof Model && property_exists($modelOrBuilder, 'apiAcceptRelations')) {
             $this->acceptRelations = $modelOrBuilder->apiAcceptRelations;
-        } elseif ($modelOrBuilder instanceof EloquentBuilder && property_exists($modelOrBuilder->getModel(), 'apiAcceptRelations')) {
+        } elseif ($modelOrBuilder instanceof EloquentBuilder && property_exists($modelOrBuilder->getModel(),
+                'apiAcceptRelations')) {
             $this->acceptRelations = $modelOrBuilder->getModel()->apiAcceptRelations;
         } else {
             $this->acceptRelations = [];
@@ -155,7 +174,7 @@ class ApiRestHelper
 
     /**
      * Returns the fields of the request in array
-     * Example: ["column1", "column2", "column3", "column4"]
+     * Example: ["column1", "column2", "column3", "column4"].
      *
      * @return array
      */
@@ -172,7 +191,7 @@ class ApiRestHelper
 
     /**
      * Returns the filters of the request in an array associative
-     * Example: ["column": "value", "column2": "value2"]
+     * Example: ["column": "value", "column2": "value2"].
      *
      * @return array
      */
@@ -193,7 +212,7 @@ class ApiRestHelper
 
     /**
      * Return the sorts of the request
-     * Example: ["column1": "desc", "column2": "asc"]
+     * Example: ["column1": "desc", "column2": "asc"].
      *
      * @return array
      */
@@ -247,7 +266,7 @@ class ApiRestHelper
     }
 
     /**
-     * Returns the fields of the request but the values was used to the select query
+     * Returns the fields of the request but the values was used to the select query.
      *
      * @return array
      */
@@ -259,19 +278,19 @@ class ApiRestHelper
         $fieldsTransformed = [];
 
         foreach ($fields as $field) {
-            $attribute = in_array($field, array_values($this->transformers), true) ? array_search($field, $this->transformers, true) : $field;
+            $attribute = in_array($field, array_values($this->transformers), true) ? array_search($field,
+                $this->transformers, true) : $field;
 
             if (in_array($attribute, $attributes, true)) {
                 $fieldsTransformed[] = $attribute;
             }
-
         }
 
         return $fieldsTransformed;
     }
 
     /**
-     * Returns the filters of the request but the keys was transformed to original value
+     * Returns the filters of the request but the keys was transformed to original value.
      *
      * @return array
      */
@@ -283,7 +302,8 @@ class ApiRestHelper
         $filtersTransformed = [];
 
         foreach ($filters as $key => $value) {
-            $attribute = in_array($key, array_values($this->transformers), true) ? array_search($key, $this->transformers, false) : $key;
+            $attribute = in_array($key, array_values($this->transformers), true) ? array_search($key,
+                $this->transformers, false) : $key;
 
             if (in_array($attribute, $attributes, false) && !in_array($attribute, $this->excludeFilter, true)) {
                 $filtersTransformed = Arr::add($filtersTransformed, $attribute, $value);
@@ -294,7 +314,7 @@ class ApiRestHelper
     }
 
     /**
-     * Returns the sorts of the request but the keys was transformed to original value
+     * Returns the sorts of the request but the keys was transformed to original value.
      *
      * @return array
      */
@@ -307,7 +327,8 @@ class ApiRestHelper
         $convertedSorts = [];
 
         foreach ($sorts as $key => $value) {
-            $attribute = in_array($key, array_values($this->transformers), true) ? array_search($key, $this->transformers, false) : $key;
+            $attribute = in_array($key, array_values($this->transformers), true) ? array_search($key,
+                $this->transformers, false) : $key;
 
             if (in_array($attribute, $attributes, true)) {
                 $convertedSorts = Arr::add($convertedSorts, $attribute, $value);
@@ -331,9 +352,8 @@ class ApiRestHelper
 
             try {
                 Validator::validate(request()->all(), $rulesPerPage);
-                $perPage = (int)request()->get('per_page');
+                $perPage = (int) request()->get('per_page');
             } catch (ValidationException $e) {
-                //
             }
         }
 
@@ -383,7 +403,8 @@ class ApiRestHelper
         $fieldsTransformers = [];
 
         foreach ($fieldsFromEmbed as $fieldFromEmbed) {
-            $attribute = in_array($fieldFromEmbed, array_values($this->transformers), true) ? array_search($fieldFromEmbed, $this->transformers, true) : $fieldFromEmbed;
+            $attribute = in_array($fieldFromEmbed, array_values($this->transformers),
+                true) ? array_search($fieldFromEmbed, $this->transformers, true) : $fieldFromEmbed;
 
             if (in_array($attribute, $attributes, true)) {
                 $fieldsTransformers[] = $attribute;
@@ -400,7 +421,7 @@ class ApiRestHelper
 
     /**
      * Check if key exists in fields
-     * When the fields are empty, return true because mean '*' in SQL
+     * When the fields are empty, return true because mean '*' in SQL.
      *
      * @param $key
      *
@@ -432,7 +453,7 @@ class ApiRestHelper
 
     /**
      * Check if key exists in fields of embed
-     * When the fields are empty, return true because mean '*' in SQL
+     * When the fields are empty, return true because mean '*' in SQL.
      *
      * @param $relationKey
      * @param $key
@@ -455,6 +476,50 @@ class ApiRestHelper
     }
 
     /**
+     * @return null|\Illuminate\Database\Eloquent\Model
+     */
+    public function toModel(): ?Model
+    {
+        $query = $this->modelOrBuilder;
+
+        if ($this->executeFields) {
+            $query = $this->apiFields($query);
+        }
+
+        if ($this->executeFilter) {
+            $query = $this->apiFilter($query);
+        }
+
+        return $query->first();
+    }
+
+    /**
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
+     */
+    public function toCollection()
+    {
+        $query = $this->modelOrBuilder;
+
+        if ($this->executeFields) {
+            $query = $this->apiFields($query);
+        }
+
+        if ($this->executeFilter) {
+            $query = $this->apiFilter($query);
+        }
+
+        if ($this->executeSorts) {
+            $query = $this->apiSort($query);
+        }
+
+        if ($this->executePaginate) {
+            $query = $this->apiPaginate($query);
+        }
+
+        return $query;
+    }
+
+    /**
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|mixed
      */
     private function getModel()
@@ -474,7 +539,7 @@ class ApiRestHelper
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $query
+     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model $query
      *
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
      */
@@ -490,7 +555,7 @@ class ApiRestHelper
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $query
+     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model $query
      *
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
      */
@@ -508,22 +573,27 @@ class ApiRestHelper
                 switch ($casts[$key]) {
                     case 'int':
                     case 'integer':
-                        $query = $query->where($key, '=', (int)$value);
+                        $query = $query->where($key, '=', (int) $value);
+
                         break;
                     case 'real':
                     case 'float':
                     case 'double':
-                        $query = $query->where($key, '=', (float)$value);
+                        $query = $query->where($key, '=', (float) $value);
+
                         break;
                     case 'string':
-                        $query = $query->where($key, '=', (string)$value);
+                        $query = $query->where($key, '=', (string) $value);
+
                         break;
                     case 'bool':
                     case 'boolean':
-                        $query = $query->where($key, '=', (bool)$value);
+                        $query = $query->where($key, '=', (bool) $value);
+
                         break;
                     case 'date':
                         $query = $query->where($key, '=', $value);
+
                         break;
                 }
             }
@@ -533,7 +603,7 @@ class ApiRestHelper
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $query
+     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model $query
      *
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
      */
@@ -549,7 +619,7 @@ class ApiRestHelper
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder $query
+     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model $query
      *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
      */
@@ -562,49 +632,5 @@ class ApiRestHelper
         }
 
         return $query->get();
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Model|null
-     */
-    public function toModel(): ?Model
-    {
-        $query = $this->getModel();
-
-        if ($this->executeFields) {
-            $query = $this->apiFields($query);
-        }
-
-        if ($this->executeFilter) {
-            $query = $this->apiFilter($query);
-        }
-
-        return $query->first();
-    }
-
-    /**
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
-     */
-    public function toCollection()
-    {
-        $query = $this->getModel();
-
-        if ($this->executeFields) {
-            $query = $this->apiFields($query);
-        }
-
-        if ($this->executeFilter) {
-            $query = $this->apiFilter($query);
-        }
-
-        if ($this->executeSorts) {
-            $query = $this->apiSort($query);
-        }
-
-        if ($this->executePaginate) {
-            $query = $this->apiPaginate($query);
-        }
-
-        return $query;
     }
 }
