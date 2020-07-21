@@ -641,7 +641,7 @@ class ApiRestHelper
         $paginateArr = $this->getPaginate();
 
         if (Arr::get($paginateArr, 'paginate', true)) {
-            return $query->paginate(array_get($paginateArr, 'per_page', 15))->appends(request()->all());
+            return $query->paginate(Arr::get($paginateArr, 'per_page', 15))->appends(request()->all());
         }
 
         return $query->get();
