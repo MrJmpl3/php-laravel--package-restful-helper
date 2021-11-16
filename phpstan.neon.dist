@@ -1,0 +1,23 @@
+parameters:
+    paths:
+        - src
+        - config
+        - tests
+
+    # The level 8 is the highest level
+    level: 5
+
+    ignoreErrors:
+        - '#Unsafe usage of new static#'
+        - message: '#is not covariant with PHPDoc type#'
+          paths:
+            - tests/Factories/*
+        - message: '#Undefined variable: \$this#'
+          paths:
+            - tests/Checks/*
+
+    #excludePaths:
+    #    - ./*/*/FileToBeExcluded.php
+
+    checkMissingIterableValueType: false
+    reportUnmatchedIgnoredErrors: false
