@@ -1,166 +1,125 @@
 # LARAVEL RESTFUL HELPER
 
-## Install
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/mrjmpl3/laravel-restful-helper.svg?style=flat-square&include_prereleases)](https://packagist.org/packages/mrjmpl3/laravel-restful-helper)
 
-Via Composer
+[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/MrJmpl3/laravel--package-restful-helper/run-tests?label=tests)](https://github.com/MrJmpl3/laravel--package-restful-helper/actions?query=workflow%3Arun-tests+branch%3Amain)
 
-``` bash
-$ composer require mrjmpl3/laravel-restful-helper
+[![GitHub Code Style Action Status](https://img.shields.io/github/workflow/status/MrJmpl3/laravel--package-restful-helper/Check%20&%20fix%20styling?label=code%20style)](https://github.com/MrJmpl3/laravel--package-restful-helper/actions?query=workflow%3A"Check+%26+fix+styling"+branch%3Amain)
+
+[![Total Downloads](https://img.shields.io/packagist/dt/mrjmpl3/laravel-restful-helper.svg?style=flat-square)](https://packagist.org/packages/mrjmpl3/laravel-restful-helper)
+
+This packages make queries depends of the request, like GraphQL.
+
+## Installation
+
+You can install the package via composer:
+
+```bash
+composer require mrjmpl3/laravel-restful-helper
+```
+You can publish the config file with:
+
+```bash
+php artisan vendor:publish --provider="MrJmpl3\LaravelRestfulHelper\LaravelRestfulHelperServiceProvider"
 ```
 
 ## Usage
 
-This packages make queries depends of the request, like GraphQL.
+### Configuration
 
-### Requests
+- Register the model in the structures data of configuration like:
 
-- **Filter data:** /product?column=value&column2=value2
-- **Sort data:** /product?sort=-column1,column2
-    - With the negative prefix = desc
-    - Without the negative prefix = asc
-- **Fields o Select data:** /product?fields=column1,column2,column3,column4
-- **Paginate and Per Page:** /product?paginate=true&per_page=5
-- **Embed:** /product?embed=relationfunction
+```php
+'structures' => [
+    [
+        'model' => \MrJmpl3\LaravelRestfulHelper\Tests\Classes\TestModel::class,
+        'data' => [
+            [
+                'routes' => ['test.index', 'test.show'],
+                'transformer' => 'transformersV1',
+                'fieldGroupName' => 'fieldGroupNameV1',
+                'allowedFields' => 'allowedFieldsV1',
+                'allowedFilters' => 'allowedFiltersV1',
+                'allowedSorts' => 'allowedSortsV1'
+            ],
+        ],
+    ],
+],
+```
+
+- The item 'transformer', 'fieldGroupName', 'allowedFields', 'allowedFilters', 'allowedSorts' and 'allowedRelations' are optional
+
+- All items value is a variable in model class, see [Model example](tests/Models/TestModel.php)
+
+- The item 'transformer' is an array where the key is the column of the table and the value is the alias.
+
+- The item 'fieldGroupName' is a string with the alias is the table name of the model when use the field request.
+
+- The item 'allowedFields' is an array with the columns allowed to the field request.
+
+- The item 'allowedFilters' is an array with the columns allowed to the filter request.
+
+- The item 'allowedSorts' is an array with the columns allowed to the sort request.
 
 ### Code
 
-#### To Collection
+- To Collection from model string
 
-```
-// Create a simple instance of model where you want apply the queries
-$model = new Product();
-$responseHelper = new ApiRestHelper($model);
-          
-// The method 'toCollection' return a collection with all data filtered
-$response = $responseHelper->toCollection();
-```
-      
-#### To Model
-
-```
-// Create a simple instance of model where you want apply the queries
-$model = new Product();           
-$responseHelper = new ApiRestHelper($model);
-                
-// The method 'toModel' return a model with all data filtered
-$response = $responseHelper->toModel();
-```
-      
-#### From Builder to Collection
-
-```
-// Important! Don't close the query with get() or paginate()
-$query = Product::where('state', = , 1);
-$responseHelper = new ApiRestHelper($query);
-          
-// The method 'toCollection' return a collection with all data filtered
-$response = $responseHelper->toCollection();
-```
-      
-#### Relations
-
-- In model, add array like next example:
-
-    ```
-    public $apiAcceptRelations = [
-        'post'
-    ];
-    ```
-    Where 'post' is the function name of relation
-                
-- In the API Resources, use the function embed
-    
-    ```
-    public function toArray($request) {
-        $embed = (new ApiRestHelper)->getEmbed();
-                
-        return [
-          'id' => $this->id,
-          'name' => $this->name,
-          $this->mergeWhen(array_key_exists('post', $embed), [
-              'post' => $this->getPostResource($embed),
-          ]),
-          'created_at' => $this->created_at,
-          'updated_at' => $this->updated_at,
-        ];
-    }
-            
-    private function getPostResource($embedRequest) {
-      $postResource = NULL;
-                
-      if (array_key_exists('local', $embed)) {
-          $postRelation = $this->local();                    
-          $fieldsFromEmbed = (new ApiRestHelper($postRelation->getModel()))->getEmbedField('post');
-                    
-          if(!empty($fieldsFromEmbed)) {
-              $postResource = new PostResource($postRelation->select($fieldsFromEmbed)->first());
-          } else {
-              $postResource = new PostResource($postRelation->first());
-          }
-      }
-            
-      return $postResource;
-    }
-    ```
-#### Transformers
-
-- In model, add array like next example:
-	
-```
-public $apiTransforms = [
-    'id' => 'code'
-];
-```
-		
-Where 'id' is the db column name , and 'code' is the column rename to response
-	
-- In the API Resources, use the array $apiTransforms
-	
-```
-$apiHelper = new ApiRestHelper($this);
-
-return [
-    $apiHelper->getKeyTransformed('id') => $this->id,
-    'name' => $this->name,
-    'created_at' => $this->created_at,
-    'updated_at' => $this->updated_at,
-];
+```php
+$apiHelper = new LaravelRestfulHelper(TestModel::class);
+$response = $apiHelper->toCollection();
 ```
 
-- To used fields in API Resources , You can combine with transformers fields
-    
-```
-$apiHelper = new ApiRestHelper($this);
+- To Collection from model object
 
-return [
-    $this->mergeWhen($apiHelper->existInFields('id') && !is_null($this->id), [
-        $this->transforms['id'] => $this->id
-    ]),
-    $this->mergeWhen($apiHelper->existInFields('name') && !is_null($this->name), [
-        'name' => $this->name
-    ]),
-]
+```php
+$modelObject = new TestModel();
+
+$apiHelper = new LaravelRestfulHelper($modelObject);
+$response = $apiHelper->toCollection();
 ```
 
-#### Exclude Fields in Filter
+- To Collection from builder query
 
-- In model, add array like next example:
-	
+```php
+$builderQuery = TestModel::where('id', '=', 1);
+
+$apiHelper = new LaravelRestfulHelper($builderQuery);
+$response = $apiHelper->toCollection();
 ```
-public $apiExcludeFilter = [
-    'id'
-];
+
+### Requests
+
+- **Fields or select data**: `/users?fields[users]=name,email`
+- **Filter data**: `/users?filter[name]=john&filter[email]=gmail`
+- **Sort data**: `/users?sort=-name,email`
+  - With the negative prefix = desc
+  - Without the negative prefix = asc
+- **Paginate data**: `/users?paginate=true&page[size]=5&page[number]=1`
+
+## Testing
+
+```bash
+composer test
 ```
-		
-Where 'id' is the db column name to exclude
-        
-## Change log
+
+## Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
-## Security
+## Contributing
 
-If you discover any security related issues, please email jmpl3.soporte@gmail.com instead of using the issue tracker.
+Please see [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
+
+## Security Vulnerabilities
+
+Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
+
+## Credits
+
+- [Jose Manuel Casani Guerra](https://github.com/mrjmpl3)
+
+- [All Contributors](../../contributors)
 
 ## License
 
