@@ -3,14 +3,14 @@
 use MrJmpl3\LaravelRestfulHelper\LaravelRestfulHelper;
 use MrJmpl3\LaravelRestfulHelper\Tests\Models\TestModel;
 
-test('test variables from model string', function () {
+test('check variables from model string', function () {
     $apiHelper = new LaravelRestfulHelper(TestModel::class);
 
     $this->assertEquals(new TestModel(), $apiHelper->model);
     $this->assertEquals(TestModel::query(), $apiHelper->queryBuilder);
 });
 
-test('test variables from model object', function () {
+test('check variables from model object', function () {
     $modelObject = new TestModel();
 
     $apiHelper = new LaravelRestfulHelper($modelObject);
@@ -19,7 +19,7 @@ test('test variables from model object', function () {
     $this->assertEquals($modelObject::query(), $apiHelper->queryBuilder);
 });
 
-test('test variables from builder query', function () {
+test('check variables from builder query', function () {
     $builderQuery = TestModel::where('id', '=', 1);
 
     $apiHelper = new LaravelRestfulHelper($builderQuery);

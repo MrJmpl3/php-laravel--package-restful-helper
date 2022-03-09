@@ -61,8 +61,8 @@ class LaravelRestfulHelperLegacy extends RestfulHelper
         $fieldRequest = collect(explode(',', request()->input('fields')))
             ->filter(fn ($item) => ! empty($item))
             ->map(function ($item) {
-                if ($this->existsValueTransformed($item)) {
-                    return $this->getValueTransformed($item);
+                if ($this->existsTransformedColumn($item)) {
+                    return $this->getOriginalColumn($item);
                 }
 
                 return $item;
@@ -82,9 +82,9 @@ class LaravelRestfulHelperLegacy extends RestfulHelper
                     return [];
                 }
 
-                if ($this->existsValueTransformed($key)) {
+                if ($this->existsTransformedColumn($key)) {
                     return [
-                        'column' => $this->getValueTransformed($key),
+                        'column' => $this->getOriginalColumn($key),
                         'value' => $item,
                     ];
                 }
@@ -115,9 +115,9 @@ class LaravelRestfulHelperLegacy extends RestfulHelper
                     $type = 'asc';
                 }
 
-                if ($this->existsValueTransformed($column)) {
+                if ($this->existsTransformedColumn($column)) {
                     return [
-                        'column' => $this->getValueTransformed($column),
+                        'column' => $this->getOriginalColumn($column),
                         'type' => $type,
                     ];
                 }

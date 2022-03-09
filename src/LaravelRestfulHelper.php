@@ -1,5 +1,4 @@
 <?php
-
 namespace MrJmpl3\LaravelRestfulHelper;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -88,15 +87,15 @@ class LaravelRestfulHelper extends RestfulHelper
             explode(
                 ',',
                 collect($this->customRequest->get('fields'))
-                    ->map(fn($item) => collect(explode(',', $item))
-                        ->map(function ($item) {
-                            if ($this->existsValueTransformed($item)) {
-                                return $this->getValueTransformed($item);
+                    ->map(fn ($item) => collect(explode(',', $item))
+                    ->map(function ($item) {
+                            if ($this->existsTransformedColumn($item)) {
+                                return $this->getOriginalColumn($item);
                             }
 
                             return $item;
                         })
-                        ->join(','))
+                    ->join(','))
                     ->get($this->model->getTable())
             )
         );
@@ -107,9 +106,9 @@ class LaravelRestfulHelper extends RestfulHelper
         return $queryBuilder->allowedFilters(
             collect($this->customRequest->get('filter'))
                 ->map(function ($item, $key) {
-                    if ($this->existsValueTransformed($key)) {
+                    if ($this->existsTransformedColumn($key)) {
                         return [
-                            'column' => $this->getValueTransformed($key),
+                            'column' => $this->getOriginalColumn($key),
                             'alias' => $key,
                         ];
                     }
@@ -120,8 +119,8 @@ class LaravelRestfulHelper extends RestfulHelper
                     ];
                 })
                 ->values()
-                ->filter(fn($item) => \in_array($item['column'], $this->allowedFilters))
-                ->map(fn($item) => AllowedFilter::exact($item['alias'], $item['column']))
+                ->filter(fn ($item) => \in_array($item['column'], $this->allowedFilters))
+                ->map(fn ($item) => AllowedFilter::exact($item['alias'], $item['column']))
                 ->all()
         );
     }
@@ -130,7 +129,7 @@ class LaravelRestfulHelper extends RestfulHelper
     {
         return $queryBuilder->allowedSorts(
             collect(explode(',', $this->customRequest->get('sort')))
-                ->filter(fn($item) => !empty($item))
+                ->filter(fn ($item) => ! empty($item))
                 ->map(function ($item) {
                     if (Str::startsWith($item, '-')) {
                         $column = mb_substr($item, 1, mb_strlen($item));
@@ -140,9 +139,9 @@ class LaravelRestfulHelper extends RestfulHelper
                         $type = 'asc';
                     }
 
-                    if ($this->existsValueTransformed($column)) {
+                    if ($this->existsTransformedColumn($column)) {
                         return [
-                            'column' => $this->getValueTransformed($column),
+                            'column' => $this->getOriginalColumn($column),
                             'alias' => $item,
                             'type' => $type,
                         ];
@@ -154,19 +153,19 @@ class LaravelRestfulHelper extends RestfulHelper
                         'type' => $type,
                     ];
                 })
-                ->filter(fn($item) => \in_array($item['column'], $this->allowedSorts))
-                ->map(fn($item) => AllowedSort::field($item['alias'], $item['column']))
+                ->filter(fn ($item) => \in_array($item['column'], $this->allowedSorts))
+                ->map(fn ($item) => AllowedSort::field($item['alias'], $item['column']))
                 ->all()
         );
     }
 
     private function executePaginate(QueryBuilder $queryBuilder): Collection|LengthAwarePaginator
     {
-        if (!$this->canPaginate) {
+        if ( ! $this->canPaginate) {
             return $queryBuilder->get();
         }
 
-        $paginate = !$this->customRequest->has('paginate') || $this->customRequest->input('paginate') === 'true';
+        $paginate = ! $this->customRequest->has('paginate') || $this->customRequest->input('paginate') === 'true';
 
         return $paginate
             ? $queryBuilder->jsonPaginate()

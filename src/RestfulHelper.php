@@ -74,27 +74,27 @@ abstract class RestfulHelper
     /**
      * @throws Throwable
      */
-    public function getKeyTransformed(string $key): string
+    public function getTransformedColumn(string $originalColumn): string
     {
-        throw_if( ! $this->existsKeyTransformed($key), "Key of transform data of ApiRestHelper missing: {$key}");
+        throw_if( ! $this->existsOriginalColumn($originalColumn), "Original column of ApiRestHelper missing: {$originalColumn}");
 
-        return $this->transformers[$key];
+        return $this->transformers[$originalColumn];
     }
 
     /**
      * @throws Throwable
      */
-    public function getValueTransformed(string $value): string
+    public function getOriginalColumn(string $transformedColumn): string
     {
-        throw_if( ! $this->existsValueTransformed($value), "Value of transform data of ApiRestHelper missing: {$value}");
+        throw_if( ! $this->existsTransformedColumn($transformedColumn), "Original column of ApiRestHelper missing: {$transformedColumn}");
 
-        return array_search($value, $this->transformers, true);
+        return array_search($transformedColumn, $this->transformers, true);
     }
 
     /**
      * @throws Throwable
      */
-    public function existsKeyTransformed(string $key): bool
+    public function existsOriginalColumn(string $key): bool
     {
         return \array_key_exists($key, $this->transformers);
     }
@@ -102,7 +102,7 @@ abstract class RestfulHelper
     /**
      * @throws Throwable
      */
-    public function existsValueTransformed(string $value): bool
+    public function existsTransformedColumn(string $value): bool
     {
         return \in_array($value, $this->transformers);
     }

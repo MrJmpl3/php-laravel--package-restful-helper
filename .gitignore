@@ -1,14 +1,32 @@
-.idea
-.php_cs
-.php_cs.cache
+# Laravel gitignore
+/node_modules
+/vendor
+.env
+.env.backup
 .phpunit.result.cache
-build
-composer.lock
-coverage
-docs
-phpunit.xml
-psalm.xml
-testbench.yaml
-vendor
-node_modules
+docker-compose.override.yml
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/.idea
+/.vscode
+
+# Vagrant
+/.vagrant
+
+# Redis Desktop Windows
+dump.rdb
+
+# PHP CS Fixer
+.php_cs.cache
 .php-cs-fixer.cache
+
+# Yarn 2
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
