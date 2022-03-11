@@ -36,9 +36,7 @@ class LaravelRestfulHelper extends RestfulHelper
     }
 
     /**
-     * Get the fields of the request and get the original columns value using the transformers
-     *
-     * @return \Illuminate\Support\Collection
+     * Get the fields of the request and get the original columns value using the transformers.
      */
     public function getFieldsRequest(): \Illuminate\Support\Collection
     {
