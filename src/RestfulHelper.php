@@ -15,6 +15,16 @@ abstract class RestfulHelper
 
     public Model $model;
 
+    public bool $canFields;
+
+    public bool $canFilters;
+
+    public bool $canSorts;
+
+    public bool $canPaginate;
+
+    public array $structures;
+
     public ?array $structureFiltered = null;
 
     public ?array $transformers = null;
@@ -27,16 +37,6 @@ abstract class RestfulHelper
 
     public ?string $fieldGroupName = null;
 
-    protected bool $canFields;
-
-    protected bool $canFilters;
-
-    protected bool $canSorts;
-
-    protected bool $canPaginate;
-
-    protected array $structures;
-
     /**
      * @throws Throwable
      */
@@ -46,8 +46,8 @@ abstract class RestfulHelper
             $this->model = (new $subject());
             $this->queryBuilder = $this->model->newQuery();
         } elseif ($subject instanceof Builder) {
-            $this->queryBuilder = $subject;
             $this->model = $subject->getModel();
+            $this->queryBuilder = $subject;
         } else {
             $this->model = $subject;
             $this->queryBuilder = $subject->newQuery();
@@ -76,7 +76,7 @@ abstract class RestfulHelper
      */
     public function getTransformedColumn(string $originalColumn): string
     {
-        throw_if( ! $this->existsOriginalColumn($originalColumn), "Original column of ApiRestHelper missing: {$originalColumn}");
+        throw_if( ! $this->existsOriginalColumn($originalColumn), sprintf('Original column of ApiRestHelper missing: %s', $originalColumn));
 
         return $this->transformers[$originalColumn];
     }
@@ -86,7 +86,7 @@ abstract class RestfulHelper
      */
     public function getOriginalColumn(string $transformedColumn): string
     {
-        throw_if( ! $this->existsTransformedColumn($transformedColumn), "Original column of ApiRestHelper missing: {$transformedColumn}");
+        throw_if( ! $this->existsTransformedColumn($transformedColumn), sprintf('Original column of ApiRestHelper missing: %s', $transformedColumn));
 
         return array_search($transformedColumn, $this->transformers, true);
     }
@@ -113,7 +113,7 @@ abstract class RestfulHelper
             ->where('model', \get_class($this->model))
             ->pluck('data')
             ->flatten(1)
-            ->filter(fn ($item) => array_search(Route::currentRouteName(), $item['routes'], true) !== false)
+            ->filter(fn ($item) => \in_array(Route::currentRouteName(), $item['routes'], true))
             ->first() ?? [];
     }
 
@@ -136,7 +136,7 @@ abstract class RestfulHelper
 
         throw_if(
             ! property_exists($this->model, $this->structureFiltered['transformer']),
-            "Property of ApiRestHelper missing: {$this->structureFiltered['transformer']} in class {$this->model}"
+            sprintf('Property of ApiRestHelper missing: %s in class %s', $this->structureFiltered['transformer'], $this->model)
         );
 
         $this->transformers = $this->model->{$this->structureFiltered['transformer']};
@@ -161,7 +161,7 @@ abstract class RestfulHelper
 
         throw_if(
             ! property_exists($this->model, $this->structureFiltered['allowedFields']),
-            "Property of ApiRestHelper missing: {$this->structureFiltered['allowedFields']} in class {$this->model}"
+            sprintf('Property of ApiRestHelper missing: %s in class %s', $this->structureFiltered['allowedFields'], $this->model)
         );
 
         $this->allowedFields = $this->model->{$this->structureFiltered['allowedFields']};
@@ -186,7 +186,7 @@ abstract class RestfulHelper
 
         throw_if(
             ! property_exists($this->model, $this->structureFiltered['allowedFilters']),
-            "Property of ApiRestHelper missing: {$this->structureFiltered['allowedFilters']} in class {$this->model}"
+            sprintf('Property of ApiRestHelper missing: %s in class %s', $this->structureFiltered['allowedFilters'], $this->model)
         );
 
         $this->allowedFilters = $this->model->{$this->structureFiltered['allowedFilters']};
@@ -211,7 +211,7 @@ abstract class RestfulHelper
 
         throw_if(
             ! property_exists($this->model, $this->structureFiltered['allowedSorts']),
-            "Property of ApiRestHelper missing: {$this->structureFiltered['allowedSorts']} in class {$this->model}"
+            sprintf('Property of ApiRestHelper missing: %s in class %s', $this->structureFiltered['allowedSorts'], $this->model)
         );
 
         $this->allowedSorts = $this->model->{$this->structureFiltered['allowedSorts']};
@@ -236,7 +236,7 @@ abstract class RestfulHelper
 
         throw_if(
             ! property_exists($this->model, $this->structureFiltered['fieldGroupName']),
-            "Property of ApiRestHelper missing: {$this->structureFiltered['fieldGroupName']} in class {$this->model}"
+            sprintf('Property of ApiRestHelper missing: %s in class %s', $this->structureFiltered['fieldGroupName'], $this->model)
         );
 
         $this->fieldGroupName = $this->model->{$this->structureFiltered['fieldGroupName']};

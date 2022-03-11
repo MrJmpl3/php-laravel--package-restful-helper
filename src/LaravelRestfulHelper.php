@@ -36,6 +36,27 @@ class LaravelRestfulHelper extends RestfulHelper
     }
 
     /**
+     * Get the fields of the request and get the original columns value using the transformers
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getFieldsRequest(): \Illuminate\Support\Collection
+    {
+        return collect($this->customRequest->get('fields'))
+            ->map(
+                fn ($item) => collect(explode(',', $item))
+                    ->map(function ($item) {
+                        if ($this->existsTransformedColumn($item)) {
+                            return $this->getOriginalColumn($item);
+                        }
+
+                        return $item;
+                    })
+                    ->join(',')
+            );
+    }
+
+    /**
      * @throws Throwable
      */
     public function toCollection(): Collection|LengthAwarePaginator
@@ -59,6 +80,10 @@ class LaravelRestfulHelper extends RestfulHelper
         return $this->executePaginate($laravelQueryBuilder);
     }
 
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     private function createCustomRequest()
     {
         $this->customRequest = request()->duplicate();
@@ -83,22 +108,7 @@ class LaravelRestfulHelper extends RestfulHelper
 
     private function executeFields(QueryBuilder $queryBuilder): QueryBuilder
     {
-        return $queryBuilder->allowedFields(
-            explode(
-                ',',
-                collect($this->customRequest->get('fields'))
-                    ->map(fn ($item) => collect(explode(',', $item))
-                    ->map(function ($item) {
-                            if ($this->existsTransformedColumn($item)) {
-                                return $this->getOriginalColumn($item);
-                            }
-
-                            return $item;
-                        })
-                    ->join(','))
-                    ->get($this->model->getTable())
-            )
-        );
+        return $queryBuilder->allowedFields(explode(',', $this->getFieldsRequest()->get($this->model->getTable())));
     }
 
     private function executeFilter(QueryBuilder $queryBuilder): QueryBuilder
