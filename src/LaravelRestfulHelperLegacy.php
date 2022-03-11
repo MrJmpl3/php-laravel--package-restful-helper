@@ -33,6 +33,25 @@ class LaravelRestfulHelperLegacy extends RestfulHelper
     }
 
     /**
+     * Get the fields of the request and get the original columns value using the transformers.
+     */
+    public function getFieldsRequest(): \Illuminate\Support\Collection
+    {
+        $columns = Schema::getColumnListing($this->model->getTable());
+
+        return collect(explode(',', request()->input('fields')))
+            ->filter(fn ($item) => ! empty($item))
+            ->map(function ($item) {
+                if ($this->existsTransformedColumn($item)) {
+                    return $this->getOriginalColumn($item);
+                }
+
+                return $item;
+            })
+            ->filter(fn ($item) => \in_array($item, $columns));
+    }
+
+    /**
      * @throws Throwable
      */
     public function toCollection(): Collection|LengthAwarePaginator
@@ -54,20 +73,20 @@ class LaravelRestfulHelperLegacy extends RestfulHelper
         return $this->executePaginate($query);
     }
 
+    public function existInFieldsRequest($key): bool
+    {
+        $fields = $this->getFieldsRequest();
+
+        if ($fields->isNotEmpty()) {
+            return $fields->contains($key);
+        }
+
+        return true;
+    }
+
     private function executeFields(Builder $queryBuilder): Builder
     {
-        $columns = Schema::getColumnListing($this->model->getTable());
-
-        $fieldRequest = collect(explode(',', request()->input('fields')))
-            ->filter(fn ($item) => ! empty($item))
-            ->map(function ($item) {
-                if ($this->existsTransformedColumn($item)) {
-                    return $this->getOriginalColumn($item);
-                }
-
-                return $item;
-            })
-            ->filter(fn ($item) => \in_array($item, $columns));
+        $fieldRequest = $this->getFieldsRequest();
 
         return $queryBuilder->select($fieldRequest->isEmpty() ? ['*'] : $fieldRequest->all());
     }

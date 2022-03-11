@@ -71,6 +71,10 @@ abstract class RestfulHelper
 
     abstract public function toCollection(): Collection|LengthAwarePaginator;
 
+    abstract public function existInFieldsRequest(string $key): bool;
+
+    abstract public function getFieldsRequest(): \Illuminate\Support\Collection;
+
     /**
      * @throws Throwable
      */

@@ -78,6 +78,17 @@ class LaravelRestfulHelper extends RestfulHelper
         return $this->executePaginate($laravelQueryBuilder);
     }
 
+    public function existInFieldsRequest($key): bool
+    {
+        $fields = $this->getFieldsRequest()->get($this->model->getTable());
+
+        if ($fields->isNotEmpty()) {
+            return $fields->contains($key);
+        }
+
+        return true;
+    }
+
     /**
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
